@@ -18,31 +18,22 @@ namespace dvd
 		/* Number of elemebts contained */
 		size_t m_Size;
 
-		std::function<size_t(const KeyType&)> m_CustomHashFunction; //I believe that the argument is wrong here
+		std::function<size_t(const KeyType&)> m_HashFunction; //I believe that the argument is wrong here
 
-		size_t calculateIndex(const KeyType& key) const
-		{
-			if (m_CustomHashFunction)
-			{
-				return m_CustomHashFunction(key) % m_Table.size();
-			}
-			else
-			{
-				debug::Log("No CustomHashFunction, using  std::hash");
-
-				return std::hash<KeyType>{} (key) % m_Table.size();
-			}
-		}
 	public: 
 		//TODO something with default constructor
+		TreasureMap() : m_Table(8), m_Size(0)
+		{
+			debug::Log("No CustomHashFunction specified, using std::hash");
 
-		TreasureMap(size_t BucketsNumber = 8) : m_Table(BucketsNumber), m_Size(0) {}
+			m_HashFunction = [this](const KeyType& key) {	return std::hash<KeyType>{}(key) % m_Table.size(); };
 
-		TreasureMap(std::initializer_list<std::pair<const KeyType&, const ValueType&>> initList) : TreasureMap(initList.size())
+		}
+
+		TreasureMap(std::initializer_list<std::pair<KeyType, ValueType>> initList) : TreasureMap() //Why i can't use reference here
 		{
 			for (const auto& pair : initList) 
 			{
-				//DOES NOT WORK
 				insert(pair.first, pair.second);
 			}
 		}
@@ -53,10 +44,11 @@ namespace dvd
 
 		/*
 		Inserts element(s) into the container, if the container doesn't already contain an element with an equivalent key.
+		TODO increases table size if size is more than number of buckets
 		*/
 		void insert(const KeyType& key, const ValueType& value)
 		{
-			size_t index = calculateIndex(key);
+			size_t index = m_HashFunction(key);
 
 			//TODO replace with iterators
 			if (m_Table[index].empty())
@@ -85,15 +77,14 @@ namespace dvd
 			}
 		}
 
-		//DOES NOT WORK
-		void insert(std::pair<const KeyType&, const ValueType&> pair)
+		void insert(const std::pair<KeyType, ValueType>& pair) //Why it does not work without const
 		{
-			this->insert(pair.first, pair.second);
+			insert(pair.first, pair.second);
 		}
 		
 		void erase(const KeyType& key)
 		{
-			size_t index = calculateIndex(key);
+			size_t index = m_HashFunction(key);
 
 			if (!m_Table[index].empty())
 			{
@@ -113,7 +104,7 @@ namespace dvd
 
 		ValueType& operator[](const KeyType& key)
 		{
-			size_t index = calculateIndex(key);
+			size_t index = m_HashFunction(key);
 
 			if (!m_Table[index].empty())
 			{
@@ -131,7 +122,7 @@ namespace dvd
 
 		bool contains(const KeyType& key)
 		{
-			size_t index = calculateIndex(key);
+			size_t index = m_HashFunction(key);
 
 			if (!m_Table[index].empty())
 			{
@@ -156,11 +147,14 @@ namespace dvd
 		{
 			for (const auto& list : m_Table)
 			{
-				for (const auto& pair : list)
+				if (!list.empty())
 				{
-					std::cout << pair.first << ", " << pair.second << " | ";
+					for (const auto& pair : list)
+					{
+						std::cout << pair.first << ", " << pair.second << " | ";
+					}
+					std::cout << std::endl;
 				}
-				std::cout << std::endl;
 			}
 		}
 	};

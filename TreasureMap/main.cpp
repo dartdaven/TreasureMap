@@ -6,19 +6,21 @@
 int main()
 {
     //Writing like it's already exist to display what is needed to be done
-    //dvd::TreasureMap<std::string, std::string> colors{ {"BLACK", "#000000"} , {"WHITE", "#FFFFFF"} };
+    dvd::TreasureMap<std::string, std::string> colors{ {"BLACK", "#000000"} , {"WHITE", "#FFFFFF"} };
 
-    dvd::TreasureMap<std::string, std::string> colors(8);
+    //Default constructor
+    //dvd::TreasureMap<std::string, std::string> colors;
 
     colors.insert("BLACK", "#000000");
 
     std::string blackColor = colors["BLACK"];
 
+    //TODO
     //colors["BLUE"] = "0000FF";
     
     colors.insert("RED", "#FF0000");
 
-    colors.insert("WHITE", "#00FF00");
+    colors.insert({ "WHITE", "#00FF00" });
 
     colors.printOut();
 
