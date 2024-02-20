@@ -13,48 +13,50 @@ namespace dvd
 	class TreasureMap 
 	{
 	private:
-		std::vector<std::list<std::pair<const KeyType&, const ValueType&>>> m_Table;
+		std::vector<std::list<std::pair<KeyType, ValueType>>> m_Table;
 		
 		/* Number of elemebts contained */
 		size_t m_Size;
 
 		std::function<size_t(const KeyType&)> m_CustomHashFunction; //I believe that the argument is wrong here
-	public: 
-		TreasureMap(size_t BucketsNumber = 8) : m_Table(BucketsNumber), m_BucketsNumber(BucketsNumber) {}
 
-		TreasureMap(std::initializer_list<std::pair<const KeyType&, const ValueType&>>) : TreasureMap(initList.size()) 
+		size_t calculateIndex(const KeyType& key) const
 		{
-			for (const auto& pair : initList) 
-			{
-				insert(pair.first, pair.second);
-			}
-		}
-		
-		size_t bucket_cont() { return m_Table.size(); }
-
-		const size_t& size() const { return m_Size; } //TODO check what is right to return in this case
-
-		/*
-		Inserts element(s) into the container, if the container doesn't already contain an element with an equivalent key.
-		
-		*/
-		void insert(const KeyType& key, const ValueType& value)
-		{
-			//TODO compare size and the buckets number, reallocate if more
-
-			size_t index;
-
-			//TODO move this to constructor
 			if (m_CustomHashFunction)
 			{
-				index = m_CustomHashFunction(key) % m_Table.size();
+				return m_CustomHashFunction(key) % m_Table.size();
 			}
 			else
 			{
 				debug::Log("No CustomHashFunction, using  std::hash");
 
-				index = std::hash<KeyType>{} (key) % m_Table.size();
+				return std::hash<KeyType>{} (key) % m_Table.size();
 			}
+		}
+	public: 
+		//TODO something with default constructor
+
+		TreasureMap(size_t BucketsNumber = 8) : m_Table(BucketsNumber), m_Size(0) {}
+
+		TreasureMap(std::initializer_list<std::pair<const KeyType&, const ValueType&>> initList) : TreasureMap(initList.size())
+		{
+			for (const auto& pair : initList) 
+			{
+				//DOES NOT WORK
+				insert(pair.first, pair.second);
+			}
+		}
+		
+		size_t bucket_count() const { return m_Table.size(); }
+
+		size_t size() const { return m_Size; }
+
+		/*
+		Inserts element(s) into the container, if the container doesn't already contain an element with an equivalent key.
+		*/
+		void insert(const KeyType& key, const ValueType& value)
+		{
+			size_t index = calculateIndex(key);
 
 			//TODO replace with iterators
 			if (m_Table[index].empty())
@@ -66,9 +68,9 @@ namespace dvd
 			{
 				bool contains{ false };
 
-				for (const auto& [k, v] : m_Table[index])
+				for (const auto& kv : m_Table[index])
 				{
-					if (key == k) contains = true;
+					if (key == kv.first) contains = true;
 				}
 
 				if (contains)
@@ -83,29 +85,18 @@ namespace dvd
 			}
 		}
 
-		void insert(std::pair<const KeyType&, const ValueType&>> pair)
+		//DOES NOT WORK
+		void insert(std::pair<const KeyType&, const ValueType&> pair)
 		{
-			insert(pair.first, par.second);
+			this->insert(pair.first, pair.second);
 		}
 		
 		void erase(const KeyType& key)
 		{
-			size_t index;
-
-			if (m_CustomHashFunction)
-			{
-				index = m_CustomHashFunction(key) % m_Table.size();
-			}
-			else
-			{
-				debug::Log("No CustomHashFunction, using  std::hash");
-
-				index = std::hash<KeyType>{} (key) % m_Table.size();
-			}
+			size_t index = calculateIndex(key);
 
 			if (!m_Table[index].empty())
 			{
-
 				for (auto it = m_Table[index].begin(); it != m_Table[index].end(); ++it)
 				{
 					if (key == it->first)
@@ -113,23 +104,65 @@ namespace dvd
 						m_Table[index].erase(it);
 						--m_Size;
 
-						break;
+						return;
 					}
 				}
+				debug::Log("Nothing to erase found");
 			}
 		}
 
 		ValueType& operator[](const KeyType& key)
 		{
+			size_t index = calculateIndex(key);
 
+			if (!m_Table[index].empty())
+			{
+				for (auto it = m_Table[index].begin(); it != m_Table[index].end(); ++it)
+				{
+					if (key == it->first)
+					{
+						return it->second;
+					}
+				}
+
+				debug::Log("Nothing to access found");
+			}
 		}
 
 		bool contains(const KeyType& key)
 		{
+			size_t index = calculateIndex(key);
 
+			if (!m_Table[index].empty())
+			{
+				for (auto it = m_Table[index].begin(); it != m_Table[index].end(); ++it)
+				{
+					if (key == it->first)
+					{
+						return true;
+					}
+				}
+
+				return false;
+			}
 		}
 
 		bool contains_by_value(const ValueType& value)
+		{
+
+		}
+
+		void printOut()
+		{
+			for (const auto& list : m_Table)
+			{
+				for (const auto& pair : list)
+				{
+					std::cout << pair.first << ", " << pair.second << " | ";
+				}
+				std::cout << std::endl;
+			}
+		}
 	};
 
 }

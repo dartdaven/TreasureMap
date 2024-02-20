@@ -130,6 +130,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Debug.h" />
     <ClInclude Include="TreasureMap.h" />
     <ClInclude Include="TreasureTree.h" />
   </ItemGroup>
