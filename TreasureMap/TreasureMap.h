@@ -4,6 +4,7 @@
 #include <list>
 #include <utility> //for pair
 #include <functional> //for custom hash function
+#include <cassert>
 
 #include "Debug.h"
 
@@ -18,24 +19,35 @@ namespace dvd
 		/* Number of elemebts contained */
 		size_t m_Size;
 
-		std::function<size_t(const KeyType&)> m_HashFunction; //I believe that the argument is wrong here
+		std::function<size_t(const KeyType&)> m_HashFunction;
+
+		size_t hash(const KeyType& key)
+		{
+			assert(m_HashFunction && "Hash fubction is absent");
+
+			return m_HashFunction(key) % m_Table.size();
+		}
 
 	public: 
-		//TODO something with default constructor
 		TreasureMap() : m_Table(8), m_Size(0)
 		{
 			debug::Log("No CustomHashFunction specified, using std::hash");
 
-			m_HashFunction = [this](const KeyType& key) {	return std::hash<KeyType>{}(key) % m_Table.size(); };
+			m_HashFunction = [](const KeyType& key) { return std::hash<KeyType>{}(key); };
 
 		}
 
-		TreasureMap(std::initializer_list<std::pair<KeyType, ValueType>> initList) : TreasureMap() //Why i can't use reference here
+		TreasureMap(std::initializer_list<std::pair<KeyType, ValueType>> initList) : TreasureMap()
 		{
 			for (const auto& pair : initList) 
 			{
 				insert(pair.first, pair.second);
 			}
+		}
+
+		TreasureMap(std::function<size_t(const KeyType&)> customHashFunction) : m_Table(8), m_Size(0), m_HashFunction(customHashFunction)
+		{
+			debug::Log("CustomHashFunction is used");
 		}
 		
 		size_t bucket_count() const { return m_Table.size(); }
@@ -48,7 +60,7 @@ namespace dvd
 		*/
 		void insert(const KeyType& key, const ValueType& value)
 		{
-			size_t index = m_HashFunction(key);
+			size_t index = hash(key);
 
 			//TODO replace with iterators
 			if (m_Table[index].empty())
@@ -77,14 +89,14 @@ namespace dvd
 			}
 		}
 
-		void insert(const std::pair<KeyType, ValueType>& pair) //Why it does not work without const
+		void insert(const std::pair<KeyType, ValueType>& pair)
 		{
 			insert(pair.first, pair.second);
 		}
 		
 		void erase(const KeyType& key)
 		{
-			size_t index = m_HashFunction(key);
+			size_t index = hash(key);
 
 			if (!m_Table[index].empty())
 			{
@@ -104,7 +116,7 @@ namespace dvd
 
 		ValueType& operator[](const KeyType& key)
 		{
-			size_t index = m_HashFunction(key);
+			size_t index = hash(key);
 
 			if (!m_Table[index].empty())
 			{
@@ -122,7 +134,7 @@ namespace dvd
 
 		bool contains(const KeyType& key)
 		{
-			size_t index = m_HashFunction(key);
+			size_t index = hash(key);
 
 			if (!m_Table[index].empty())
 			{
@@ -153,10 +165,27 @@ namespace dvd
 					{
 						std::cout << pair.first << ", " << pair.second << " | ";
 					}
-					std::cout << std::endl;
 				}
+				std::cout << std::endl;
 			}
 		}
+
+		// ------- Debug section -------
+
+		TreasureMap(size_t tableSize) : m_Table(tableSize), m_Size(0)
+		{
+			debug::Log("No CustomHashFunction specified, using std::hash");
+
+			m_HashFunction = [](const KeyType& key) { return std::hash<KeyType>{}(key); };
+		}
+
+		void resizeTable(int newSize)
+		{
+			m_Table.resize(newSize);
+		}
+
 	};
+
+
 
 }

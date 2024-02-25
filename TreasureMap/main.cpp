@@ -5,41 +5,37 @@
 
 int main()
 {
-    //Writing like it's already exist to display what is needed to be done
-    dvd::TreasureMap<std::string, std::string> colors{ {"BLACK", "#000000"} , {"WHITE", "#FFFFFF"} };
+    //Copy hash function problem is solved
 
-    //Default constructor
-    //dvd::TreasureMap<std::string, std::string> colors;
+    dvd::TreasureMap<std::string, std::string> colors(2);
 
-    colors.insert("BLACK", "#000000");
+    dvd::TreasureMap<std::string, std::string> printables = colors;
 
-    std::string blackColor = colors["BLACK"];
+    printables.resizeTable(10);
 
-    //TODO
-    //colors["BLUE"] = "0000FF";
+    printables.insert("1", "one");
+    printables.insert("2", "two");
+    printables.insert("3", "three");
+    printables.insert("4", "four");
+    printables.insert("5", "five");
+    printables.insert("6", "six");
+
+    printables.printOut();
     
-    colors.insert("RED", "#FF0000");
+    
+    //Custom hash function working
+    
+    std::function<size_t(const std::string&)> badHashFunction = [](const std::string& string) { return 3; };
+    dvd::TreasureMap<std::string, std::string> strings(badHashFunction);
 
-    colors.insert({ "WHITE", "#00FF00" });
-
-    colors.printOut();
-
-    //Should I actually do it?
-    //colors.emplace("GREEN", "#00FF00");
-
-    colors.erase("RED");
-
-    if (colors.contains("BLACK")) std::cout << "contains\n";
-
-    std::cout << "size of the colors: " << colors.size() << std::endl;
-
-    colors.printOut();
-
-    //Need a custom iterator for this
-    //for (const auto& kv : colors)
-    //{
-    //    std::cout << kv.first << " is " << kv.second << std::endl;
-    //}
+    strings.insert("1", "one");
+    strings.insert("2", "two");
+    strings.insert("3", "three");
+    strings.insert("4", "four");
+    strings.insert("5", "five");
+    strings.insert("6", "six");
+    
+    strings.printOut();
 
     std::cin.get();
 }
