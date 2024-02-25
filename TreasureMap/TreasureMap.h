@@ -23,7 +23,7 @@ namespace dvd
 
 		size_t hash(const KeyType& key)
 		{
-			assert(m_HashFunction && "Hash fubction is absent");
+			assert(m_HashFunction && "Hash function is absent");
 
 			return m_HashFunction(key) % m_Table.size();
 		}
@@ -62,7 +62,6 @@ namespace dvd
 		{
 			size_t index = hash(key);
 
-			//TODO replace with iterators
 			if (m_Table[index].empty())
 			{
 				m_Table[index].emplace_back(key, value);
@@ -70,28 +69,57 @@ namespace dvd
 			}
 			else
 			{
-				bool contains{ false };
+				for (auto& kv : m_Table[index])
+				{
+					if (key == kv.first)
+					{
+						kv.second = value;
 
-				for (const auto& kv : m_Table[index])
-				{
-					if (key == kv.first) contains = true;
-				}
+						debug::Log("The value renewed");
 
-				if (contains)
-				{
-					debug::Log("Element with this key already exists in this map");
+						return;
+					}
 				}
-				else
-				{
-					m_Table[index].emplace_back(key, value);
-					++m_Size;
-				}
+				m_Table[index].emplace_back(key, value);
+				++m_Size;
 			}
 		}
 
 		void insert(const std::pair<KeyType, ValueType>& pair)
 		{
 			insert(pair.first, pair.second);
+		}
+
+		//TODO create an insert for rvalues
+		
+		template<typename... Args>
+		void emplace(Args&&... args)
+		{
+			//to get the first argument
+			KeyType key = std::get<0>(std::forward_as_tuple(std::forward<Args>(args)...));
+
+			size_t index = hash(key);
+
+			if (m_Table[index].empty())
+			{
+				m_Table[index].emplace_back(std::forward<Args>(args)...);
+				++m_Size;
+			}
+			else
+			{
+				for (const auto& kv : m_Table[index])
+				{
+					if (key == kv.first)
+					{
+						debug::Log("Can't emplace. Element with this key already exists in this map");
+
+						return;
+					}
+				}
+				m_Table[index].emplace_back(std::forward<Args>(args)...);
+				++m_Size;
+			}
+
 		}
 		
 		void erase(const KeyType& key)
@@ -169,23 +197,5 @@ namespace dvd
 				std::cout << std::endl;
 			}
 		}
-
-		// ------- Debug section -------
-
-		TreasureMap(size_t tableSize) : m_Table(tableSize), m_Size(0)
-		{
-			debug::Log("No CustomHashFunction specified, using std::hash");
-
-			m_HashFunction = [](const KeyType& key) { return std::hash<KeyType>{}(key); };
-		}
-
-		void resizeTable(int newSize)
-		{
-			m_Table.resize(newSize);
-		}
-
 	};
-
-
-
 }

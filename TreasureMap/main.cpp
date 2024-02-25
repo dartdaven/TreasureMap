@@ -3,39 +3,23 @@
 #include "TreasureMap.h"
 #include "TreasureTree.h"
 
+//TODO create a struct with debug messages on copy and move constructors and get through the map
+
 int main()
 {
-    //Copy hash function problem is solved
+    dvd::TreasureMap<std::string, std::string> colors{ {"BLACK", "#000000"} , {"WHITE", "#FFFFFF"} };
 
-    dvd::TreasureMap<std::string, std::string> colors(2);
+    colors.insert("BLACK", "#000000");
 
-    dvd::TreasureMap<std::string, std::string> printables = colors;
+    std::string blackColor = colors["BLACK"];
 
-    printables.resizeTable(10);
+    colors.emplace("RED", "#FF0000");
 
-    printables.insert("1", "one");
-    printables.insert("2", "two");
-    printables.insert("3", "three");
-    printables.insert("4", "four");
-    printables.insert("5", "five");
-    printables.insert("6", "six");
+    colors.insert({ "WHITE", "#00FF00" });
 
-    printables.printOut();
-    
-    
-    //Custom hash function working
-    
-    std::function<size_t(const std::string&)> badHashFunction = [](const std::string& string) { return 3; };
-    dvd::TreasureMap<std::string, std::string> strings(badHashFunction);
+    colors.erase("GREEN");
 
-    strings.insert("1", "one");
-    strings.insert("2", "two");
-    strings.insert("3", "three");
-    strings.insert("4", "four");
-    strings.insert("5", "five");
-    strings.insert("6", "six");
-    
-    strings.printOut();
+    colors.printOut();
 
     std::cin.get();
 }
