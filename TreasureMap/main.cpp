@@ -13,14 +13,14 @@ int main()
 
         colors.insert("GREEN", "#000000");
 
-        //std::string blackColor = colors["BLACK"];
+        std::string blackColor = colors["RED"];
+        blackColor = colors["BLACK"];
 
         // colors.emplace("RED", "#FF0000");
 
         colors.insert({ "WHITE", "#00FF00" });
 
-        colors.erase("GREEN");
-
+        //colors.erase("GREEN");
     }
 
     //colors.printOut();

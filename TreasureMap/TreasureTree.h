@@ -24,14 +24,28 @@ namespace dvd
 
         std::unique_ptr<Node> m_Root;
 
+        size_t m_Size;
+
         // ------- Utilities -------
 
         void realInsert(std::unique_ptr<Node>& node, const KeyType& key, const ValueType& value)
         {
-            if (!node) node = std::make_unique<Node>(key, value);
+            if (!node)
+            {
+                node = std::make_unique<Node>(key, value);
+                ++m_Size;
+            }
             else if (key < node->key) realInsert(node->left, key, value);
-            else if (key > node->key) realInsert(node->right, key, value); //will it work if "less" is not defined?
+            else if (key > node->key) realInsert(node->right, key, value); //Will it work if "less" is not defined?
             else node->value = value; //Update the value in node
+        }
+
+        std::unique_ptr<Node>& find(std::unique_ptr<Node>& node, const KeyType& key)
+        {
+            if (!node) return node; //nullptr
+            else if (key < node->key) find(node->left, key);
+            else if (key > node->key) find(node->right, key);
+            else return node;
         }
 
     public:
@@ -43,6 +57,8 @@ namespace dvd
             }
         }
 
+        size_t size() const { return m_Size; }
+
         void insert(const KeyType& key, const ValueType& value)
         {
             realInsert(m_Root, key, value);
@@ -53,14 +69,28 @@ namespace dvd
             realInsert(m_Root, pair.first, pair.second);
         }
 
-        void erase(const KeyType& key)
-        {
-
-        }
-
-        //ValueType& operator[](const KeyType& key)
+        //void erase(const KeyType& key)
         //{
-        //    return nullptr;
+        //    std::unique_ptr<Node>& node = find(m_Root, key);
+
+        //    if (node)
+        //    {
+        //        if (!node->left && !node->right) node.reset;
+        //        else if (!node->left) node = std::move(node->right);
+        //        else if (!node->right) node = std::move(node->left);
+        //        else
+        //        {
+        //            //Not that easy
+        //        }
+        //    }
         //}
+
+        ValueType& operator[](const KeyType& key)
+        {
+            std::unique_ptr<Node>& node = find(m_Root, key);
+            
+            if (node) return node->value;
+            else debug::Log("Nothing to access found");
+        }
     };
 }
