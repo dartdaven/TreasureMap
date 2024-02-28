@@ -1,38 +1,59 @@
 #pragma once
 
-template<typename KeyType, typename ValueType>
-class TreasureTree
+
+namespace dvd
 {
-    struct Node
+    template<typename KeyType, typename ValueType>
+    class TreasureTree
     {
-        KeyType key;
-        ValueType value;
-        std::unique_ptr<Node> left;
-        std::unique_ptr<Node> right;
+        struct Node
+        {
+            KeyType key;
+            ValueType value;
+            std::unique_ptr<Node> left;
+            std::unique_ptr<Node> right;
 
-        Node(const Key& k, const Value& v) : key(k), value(v) {}
-    }
+            Node(const Key& k, const Value& v) : key(k), value(v) {}
+        }
 
-    std::unique_ptr<Node> root;
+        std::unique_ptr<Node> m_Root;
 
-public:
-    void insert(const KeyType& key, const ValueType& value)
-    {
+        void realInsert(std::unique_ptr<Node>& node, const KeyType& key, const ValueType& value)
+        {
+            if (!node) node = std::make_unique<Node>(key, value);
+            else if (key < node->key) realInsert(node->left, key, value);
+            else if (key > node->key) realInsert(node->right, key, value);
+            else node->value = value; //Update the value in node
+        }
 
-    }
 
-    void insert(const std::pair<KeyType, ValueType>& pair)
-    {
-        insert(pair.first, pair.second);
-    }
+    public:
+        TreasureTree(std::initializer_list<std::pair<KeyType, ValueType>> initList)
+        {
+            for (const auto& pair : initList)
+            {
+                insert(pair.first, pair.second);
+            }
+        }
 
-    void erase(const KeyType& key)
-    {
+        void insert(const KeyType& key, const ValueType& value)
+        {
+            realInsert(root, key, value);
+        }
 
-    }
+        void insert(const std::pair<KeyType, ValueType>& pair)
+        {
+            realInsert(root, pair.first, pair.second);
+        }
 
-    ValueType& operator[](const KeyType& key)
-    {
+        void erase(const KeyType& key)
+        {
 
-    }
-};
+        }
+
+        ValueType& operator[](const KeyType& key)
+        {
+
+        }
+    };
+}
