@@ -7,19 +7,23 @@
 
 int main()
 {
-    dvd::TreasureMap<std::string, std::string> colors{ {"BLACK", "#000000"} , {"WHITE", "#FFFFFF"} };
+    {
 
-    colors.insert("BLACK", "#000000");
+        dvd::TreasureTree<std::string, std::string> colors{ {"BLACK", "#000000"} , {"WHITE", "#FFFFFF"} };
 
-    std::string blackColor = colors["BLACK"];
+        colors.insert("GREEN", "#000000");
 
-    colors.emplace("RED", "#FF0000");
+        //std::string blackColor = colors["BLACK"];
 
-    colors.insert({ "WHITE", "#00FF00" });
+        // colors.emplace("RED", "#FF0000");
 
-    colors.erase("GREEN");
+        colors.insert({ "WHITE", "#00FF00" });
 
-    colors.printOut();
+        colors.erase("GREEN");
+
+    }
+
+    //colors.printOut();
 
     std::cin.get();
 }
