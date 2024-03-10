@@ -7,30 +7,17 @@
 
 int main()
 {
+    dvd::TreasureTree<int, std::string> numbers{ {8, "Eight"} , {9, "Nine"} };
 
+    numbers.insert(3, "Three");
+    numbers.insert(2, "Two");
+    numbers.insert(5, "Five");
+    numbers.insert(4, "Four");
+    numbers.insert(6, "Six");
+    numbers.insert(7, "Seven");
 
-    dvd::TreasureTree<std::string, std::string> colors{ {"BLACK", "#000000"} , {"WHITE", "#FFFFFF"} };
-
-    //insert works
-    colors.insert("GREEN", "#00FF00");
-
-    //Try to take value that is not stored 
-    std::string blackColor = colors["RED"];
-
-    //Try to take value
-    blackColor = colors["BLACK"];
-
-    // colors.emplace("RED", "#FF0000");
-
-    //Overwrite value
-    colors.insert({ "WHITE", "#00FF00" });
-
-    colors.printOut();
-    
-    colors.erase("GREEN");
-
-    colors.printOut();
-
+    numbers.erase(3);
+    numbers.erase(4); //I don't know why it works, but it works perfectly
 
     std::cin.get();
 }

@@ -27,8 +27,8 @@ namespace dvd
         size_t m_Size;
 
         // ------- Utilities -------
-
         //TODO get rid of recursion
+
         void realInsert(std::unique_ptr<Node>& node, const KeyType& key, const ValueType& value)
         {
             if (!node)
@@ -41,7 +41,6 @@ namespace dvd
             else node->value = value; //Update the value in node
         }
 
-        //TODO get rid of recursion
         std::unique_ptr<Node>& find(std::unique_ptr<Node>& node, const KeyType& key)
         {
             if (!node) return node; //nullptr
@@ -58,6 +57,31 @@ namespace dvd
             realPrintOut(node->left);
             std::cout << node->key << " : " << node->value << std::endl;
             realPrintOut(node->right);
+        }
+
+        std::unique_ptr<Node>& findMinNodeInSubTree(std::unique_ptr<Node>& node)
+        {
+            if (!node->left) return node;
+            else findMinNodeInSubTree(node->left);            
+        }
+
+        //Overload that takes reference
+        void erase(std::unique_ptr<Node>& node)
+        {
+            if (!node->left && !node->right) node.reset();
+            else if (!node->left) node = std::move(node->right);
+            else if (!node->right) node = std::move(node->left);
+            else
+            {
+                std::unique_ptr<Node>& replacementNode = findMinNodeInSubTree(node->right);
+
+                if (replacementNode->right)
+                {
+                    node->key = replacementNode->key;
+                    node->value = replacementNode->value;
+                    erase(replacementNode);
+                }
+            }
         }
 
     public:
@@ -92,7 +116,11 @@ namespace dvd
                 else if (!node->right) node = std::move(node->left);
                 else
                 {
-                    //TO FIND SOLUTION
+                    std::unique_ptr<Node>& replacementNode = findMinNodeInSubTree(node->right);
+                    
+                    node->key = replacementNode->key;
+                    node->value = replacementNode->value;
+                    erase(replacementNode);
                 }
             }
         }
