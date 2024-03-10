@@ -28,6 +28,7 @@ namespace dvd
 
         // ------- Utilities -------
 
+        //TODO get rid of recursion
         void realInsert(std::unique_ptr<Node>& node, const KeyType& key, const ValueType& value)
         {
             if (!node)
@@ -36,16 +37,27 @@ namespace dvd
                 ++m_Size;
             }
             else if (key < node->key) realInsert(node->left, key, value);
-            else if (key > node->key) realInsert(node->right, key, value); //Will it work if "less" is not defined?
+            else if (key > node->key) realInsert(node->right, key, value);
             else node->value = value; //Update the value in node
         }
 
+        //TODO get rid of recursion
         std::unique_ptr<Node>& find(std::unique_ptr<Node>& node, const KeyType& key)
         {
             if (!node) return node; //nullptr
             else if (key < node->key) find(node->left, key);
             else if (key > node->key) find(node->right, key);
             else return node;
+        }
+
+        //In-Order traversal
+        void realPrintOut(std::unique_ptr<Node>& node)
+        {
+            if (!node) return;
+
+            realPrintOut(node->left);
+            std::cout << node->key << " : " << node->value << std::endl;
+            realPrintOut(node->right);
         }
 
     public:
@@ -69,21 +81,21 @@ namespace dvd
             realInsert(m_Root, pair.first, pair.second);
         }
 
-        //void erase(const KeyType& key)
-        //{
-        //    std::unique_ptr<Node>& node = find(m_Root, key);
+        void erase(const KeyType& key)
+        {
+            std::unique_ptr<Node>& node = find(m_Root, key);
 
-        //    if (node)
-        //    {
-        //        if (!node->left && !node->right) node.reset;
-        //        else if (!node->left) node = std::move(node->right);
-        //        else if (!node->right) node = std::move(node->left);
-        //        else
-        //        {
-        //            //Not that easy
-        //        }
-        //    }
-        //}
+            if (node)
+            {
+                if (!node->left && !node->right) node.reset();
+                else if (!node->left) node = std::move(node->right);
+                else if (!node->right) node = std::move(node->left);
+                else
+                {
+                    //TO FIND SOLUTION
+                }
+            }
+        }
 
         ValueType& operator[](const KeyType& key)
         {
@@ -91,6 +103,11 @@ namespace dvd
             
             if (node) return node->value;
             else debug::Log("Nothing to access found");
+        }
+
+        void printOut()
+        {
+            realPrintOut(m_Root);
         }
     };
 }

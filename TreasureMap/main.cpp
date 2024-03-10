@@ -7,23 +7,30 @@
 
 int main()
 {
-    {
 
-        dvd::TreasureTree<std::string, std::string> colors{ {"BLACK", "#000000"} , {"WHITE", "#FFFFFF"} };
 
-        colors.insert("GREEN", "#000000");
+    dvd::TreasureTree<std::string, std::string> colors{ {"BLACK", "#000000"} , {"WHITE", "#FFFFFF"} };
 
-        std::string blackColor = colors["RED"];
-        blackColor = colors["BLACK"];
+    //insert works
+    colors.insert("GREEN", "#00FF00");
 
-        // colors.emplace("RED", "#FF0000");
+    //Try to take value that is not stored 
+    std::string blackColor = colors["RED"];
 
-        colors.insert({ "WHITE", "#00FF00" });
+    //Try to take value
+    blackColor = colors["BLACK"];
 
-        //colors.erase("GREEN");
-    }
+    // colors.emplace("RED", "#FF0000");
 
-    //colors.printOut();
+    //Overwrite value
+    colors.insert({ "WHITE", "#00FF00" });
+
+    colors.printOut();
+    
+    colors.erase("GREEN");
+
+    colors.printOut();
+
 
     std::cin.get();
 }

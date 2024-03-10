@@ -69,11 +69,11 @@ namespace dvd
 			}
 			else
 			{
-				for (auto& kv : m_Table[index])
+				for (auto& [k, v] : m_Table[index])
 				{
-					if (key == kv.first)
+					if (key == k)
 					{
-						kv.second = value;
+						v = value;
 
 						debug::Log("The value renewed");
 
@@ -93,11 +93,8 @@ namespace dvd
 		//TODO create an insert for rvalues
 		
 		template<typename... Args>
-		void emplace(Args&&... args)
+		void emplace(KeyType key, Args&&... args)
 		{
-			//to get the first argument
-			KeyType key = std::get<0>(std::forward_as_tuple(std::forward<Args>(args)...));
-
 			size_t index = hash(key);
 
 			if (m_Table[index].empty())
@@ -107,9 +104,9 @@ namespace dvd
 			}
 			else
 			{
-				for (const auto& kv : m_Table[index])
+				for (const auto& [k, v] : m_Table[index])
 				{
-					if (key == kv.first)
+					if (key == k)
 					{
 						debug::Log("Can't emplace. Element with this key already exists in this map");
 
