@@ -1,6 +1,5 @@
 #pragma once
 
-
 namespace dvd
 {
     template<typename KeyType, typename ValueType>
@@ -39,6 +38,19 @@ namespace dvd
             else if (key < node->key) realInsert(node->left, key, value);
             else if (key > node->key) realInsert(node->right, key, value);
             else node->value = value; //Update the value in node
+        }
+
+        template<typename... Args>
+        void realEmplace(std::unique_ptr<Node>& node, const KeyType& key, Args&&... args)
+        {
+            if (!node)
+            {
+                node = std::make_unique<Node>(key, std::forward<Args>(args)...);
+                ++m_Size;
+            }
+            else if (key < node->key) realEmplace(node->left, key, std::forward<Args>(args)...);
+            else if (key > node->key) realEmplace(node->right, key, std::forward<Args>(args)...);
+            else node->value = ValueType(std::forward<Args>(args)...);
         }
 
         std::unique_ptr<Node>& find(std::unique_ptr<Node>& node, const KeyType& key)
@@ -105,6 +117,12 @@ namespace dvd
             realInsert(m_Root, pair.first, pair.second);
         }
 
+        template<typename... Args>
+        void emplace(const KeyType& key, Args&&... args)
+        {
+            realEmplace(m_Root, key, std::forward<Args>(args)...);
+        }
+
         void erase(const KeyType& key)
         {
             std::unique_ptr<Node>& node = find(m_Root, key);
@@ -136,6 +154,12 @@ namespace dvd
         void printOut()
         {
             realPrintOut(m_Root);
+        }
+
+        bool contains(const KeyType& key)
+        {
+            if (find(m_Root, key) != nullptr) return true;
+            else return false;
         }
     };
 }

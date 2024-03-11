@@ -14,10 +14,14 @@ int main()
     numbers.insert(5, "Five");
     numbers.insert(4, "Four");
     numbers.insert(6, "Six");
-    numbers.insert(7, "Seven");
+    numbers.emplace(7, "Seven");
+
+    if (numbers.contains(4)) debug::Log("Hello");
 
     numbers.erase(3);
     numbers.erase(4); //I don't know why it works, but it works perfectly
+
+    if (!numbers.contains(4)) debug::Log("Bye");
 
     std::cin.get();
 }
