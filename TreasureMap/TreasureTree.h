@@ -99,9 +99,9 @@ namespace dvd
     public:
         TreasureTree(std::initializer_list<std::pair<KeyType, ValueType>> initList)
         {
-            for (const auto& pair : initList)
+            for (const auto& [k, v] : initList)
             {
-                insert(pair.first, pair.second);
+                realInsert(m_Root, k, v);
             }
         }
 
