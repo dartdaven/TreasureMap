@@ -19,7 +19,7 @@ int main()
     if (numbers.contains(4)) debug::Log("Hello");
 
     numbers.erase(3);
-    numbers.erase(4); //I don't know why it works, but it works perfectly
+    numbers.erase(4);
 
     if (!numbers.contains(4)) debug::Log("Bye");
 
