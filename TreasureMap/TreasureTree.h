@@ -25,8 +25,8 @@ namespace dvd
 
         size_t m_Size;
 
+        
         // ------- Utilities -------
-        //TODO get rid of recursion
 
         void realInsert(std::unique_ptr<Node>& node, const KeyType& key, const ValueType& value)
         {
@@ -77,7 +77,6 @@ namespace dvd
             else findMinNodeInSubTree(node->left);            
         }
 
-        //Overload that takes reference
         void erase(std::unique_ptr<Node>& node)
         {
             if (!node->left && !node->right) node.reset();
@@ -92,6 +91,9 @@ namespace dvd
                 erase(replacementNode);
             }
         }
+
+
+
 
     public:
         TreasureTree(std::initializer_list<std::pair<KeyType, ValueType>> initList)

@@ -16,9 +16,12 @@ namespace dvd
             std::unique_ptr<Node> left;
             std::unique_ptr<Node> right;
             Color color;
+            
+            //Should be shared pointer?
+            Node* parent;
 
             //TODO define default color here
-            Node(const KeyType& k, const ValueType& v) : key(k), value(v) {}
+            Node(const KeyType& k, const ValueType& v) : key(k), value(v), parent(nullptr) {}
 
             //Debug
             ~Node()
@@ -34,12 +37,45 @@ namespace dvd
     public:
         RBTree(std::initializer_list<std::pair<KeyType, ValueType>> initList)
         {
-
+            for (const auto& [k, v] : initList)
+            {
+                insert(k, v);
+            }
         }
 
-        void incert(const KeyType& key, const ValueType& value)
+        //Without recursion
+        void insert(const KeyType& key, const ValueType& value)
         {
+            std::unique_ptr<Node> newNode = std::make_unique<Node>(key, value);
 
+            if (!m_Root)
+            {
+                m_Root = std::move(newNode);
+                m_Root->color = Color::Black;
+                ++m_Size;
+
+                return;
+            }
+
+            Node* nodeToAttachTo = nullptr;
+            Node* iterator = m_Root.get();
+
+            //Searching for suitable place
+            while (iterator)
+            {
+                nodeToAttachTo = iterator;
+                
+                if (key < iterator->key) iterator = iterator->left.get();
+                else if (key > iterator->key) iterator = iterator->right.get();
+                else
+                {
+                    iterator->value = value; //Update the value in node
+                    return;
+                }
+            }
+
+            if (key < nodeToAttachTo->key) nodeToAttachTo->left = std::move(newNode);
+            else nodeToAttachTo->right = std::move(newNode);
         }
 
     };
