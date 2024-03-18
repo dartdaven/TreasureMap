@@ -16,29 +16,13 @@ void test1()
     numbers.insert(6, "Six");
     numbers.insert(9, "Nine");
 
-    numbers.leftRotate(5);
+    numbers.printBFS();
 }
 
-void test2()
-{
-    dvd::RBTree<int, std::string> numbers{ {10, "Ten"}, { 15, "Fifteen" } };
-
-    numbers.insert(5, "Five");
-    numbers.insert(2, "Two");
-    numbers.insert(7, "Seven");
-    numbers.insert(6, "Six");
-    numbers.insert(8, "Eight");
-
-    numbers.leftRotate(5);
-
-    numbers.rightRotate(7);
-
-    std::cin.get();
-}
 
 int main()
 {
-    test2();
+    test1();
 
     std::cin.get();
 }

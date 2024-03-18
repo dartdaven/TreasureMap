@@ -1,5 +1,7 @@
 #pragma once
 
+#include <queue>
+
 #include "Debug.h"
 
 enum class Color {Black, Red};
@@ -85,6 +87,74 @@ namespace dvd
             y->parent = x;
         }
 
+        //TODO solve weak_ptr problem
+        void insertFixup(std::shared_ptr<Node>& z)
+        {
+            while (z->parent.lock() != nullptr && z->parent.lock()->color == Color::Red)
+            {
+                //If parent is left child of grandparent
+                if (z->parent == z->parent->parent->left)
+                {
+                    std::shared_ptr<Node> uncle = z->parent->parent->right;
+
+                    //Uncle is red
+                    if (uncle != nullptr && uncle->color == Color::Red)
+                    {
+                        z->parent->color = Color::Black;
+                        uncle->color = Color::Black;
+                        z->parent->parent->color = Color::Red;
+                        z = z->parent->parent;
+                    }
+                    
+                    //Uncle is black
+                    else
+                    {
+                        if (z == z->parent->right)
+                        {
+                            z = z->parent;
+                            leftRotate(z);
+                        }
+
+                        z->parent->color = Color::Black;
+                        z->parent->parent->color = Color::Red;
+                        rightRotate(z->parent->parent);
+                    }
+                }
+
+                //If parent is right child of grandparent
+                else
+                {
+                    std::shared_ptr<Node> uncle = z->parent->parent->right;
+
+                    //Uncle is red
+                    if (uncle != nullptr && uncle->color == Color::Red)
+                    {
+                        z->parent->color = Color::Black;
+                        uncle->color = Color::Black;
+                        z->parent->parent->color = Color::Red;
+                        z = z->parent->parent;
+                    }
+
+                    //Uncle is black
+                    else
+                    {
+                        if (z == z->parent->left)
+                        {
+                            z = z->parent;
+                            rightRotate(z);
+                        }
+
+                        z->parent->color = Color::Black;
+                        z->parent->parent->color = Color::Red;
+                        leftRotate(z->parent->parent);
+                    }
+
+                }
+            }
+
+            m_Root->color = Color::Black;
+        }
+
     public:
         RBTree(std::initializer_list<std::pair<KeyType, ValueType>> initList)
         {
@@ -108,7 +178,6 @@ namespace dvd
             std::shared_ptr<Node> nodeToAttachTo;
             std::shared_ptr<Node> iterator = m_Root;
 
-            //Searching for suitable place
             while (iterator)
             {
                 nodeToAttachTo = iterator;
@@ -125,27 +194,45 @@ namespace dvd
             if (key < nodeToAttachTo->key)
             {
                 nodeToAttachTo->left = std::make_shared<Node>(key, value, Color::Red, nodeToAttachTo);
+                insertFixup(nodeToAttachTo->left);
             }
-            else nodeToAttachTo->right = std::make_shared<Node>(key, value, Color::Red, nodeToAttachTo);
-            
+            else
+            {
+                nodeToAttachTo->right = std::make_shared<Node>(key, value, Color::Red, nodeToAttachTo);
+                insertFixup(nodeToAttachTo->right);
+            }
             ++m_Size;
         }
         
-        //debug
-        void leftRotate(const KeyType& key)
+        //Debug
+        void printBFS() const
         {
-            std::shared_ptr<Node> nodeToRotate = find(key);
-            if (nodeToRotate)
-                leftRotate(nodeToRotate);
+            if (!m_Root)
+            {
+                std::cout << "Tree is empty." << std::endl;
+                return;
+            }
+
+            std::queue<std::shared_ptr<Node>> q;
+            q.push(m_Root);
+
+            while (!q.empty())
+            {
+                size_t levelSize = q.size();
+                
+                for (size_t i = 0; i < levelSize; ++i)
+                {
+                    std::shared_ptr<Node> current = q.front();
+                    q.pop();
+
+                    std::cout << current->key << "(" << (current->color == Color::Red ? "Red" : "Black") << ") ";
+
+                    if (current->left) q.push(current->left);
+                    if (current->right) q.push(current->right);
+                }
+
+                std::cout << std::endl;
+            }
         }
-
-        void rightRotate(const KeyType& key)
-        {
-            std::shared_ptr<Node> nodeToRotate = find(key);
-            if (nodeToRotate)
-                rightRotate(nodeToRotate);
-        }
-
-
     };
 }
