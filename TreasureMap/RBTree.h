@@ -88,65 +88,80 @@ namespace dvd
         }
 
         //TODO solve weak_ptr problem
-        void insertFixup(std::shared_ptr<Node>& z)
+        void insertFixup(std::shared_ptr<Node> z)
         {
+            //std::shared_ptr<Node> z = newNode; //Is it the same as accept atribute as copy?
+
             while (z->parent.lock() != nullptr && z->parent.lock()->color == Color::Red)
             {
+               // printBFS();
+
+                std::shared_ptr<Node> parent = z->parent.lock();
+                std::shared_ptr<Node> grandparent = parent->parent.lock();
+         
                 //If parent is left child of grandparent
-                if (z->parent == z->parent->parent->left)
+                if (parent == grandparent->left)
                 {
-                    std::shared_ptr<Node> uncle = z->parent->parent->right;
+                    std::shared_ptr<Node> uncle = grandparent->right;
 
                     //Uncle is red
                     if (uncle != nullptr && uncle->color == Color::Red)
                     {
-                        z->parent->color = Color::Black;
+                        parent->color = Color::Black;
                         uncle->color = Color::Black;
-                        z->parent->parent->color = Color::Red;
-                        z = z->parent->parent;
+                        grandparent->color = Color::Red;
+                        z = grandparent;
                     }
                     
                     //Uncle is black
                     else
                     {
-                        if (z == z->parent->right)
+                        if (z == parent->right)
                         {
-                            z = z->parent;
+                            z = parent;
                             leftRotate(z);
+
+                            //reassign after rotation
+                            parent = z->parent.lock();
+                            grandparent = parent->parent.lock();
                         }
 
-                        z->parent->color = Color::Black;
-                        z->parent->parent->color = Color::Red;
-                        rightRotate(z->parent->parent);
+                        parent->color = Color::Black;
+                        grandparent->color = Color::Red;
+                        rightRotate(grandparent);
                     }
                 }
 
                 //If parent is right child of grandparent
                 else
                 {
-                    std::shared_ptr<Node> uncle = z->parent->parent->right;
+                    std::shared_ptr<Node> uncle = grandparent->left;
 
                     //Uncle is red
                     if (uncle != nullptr && uncle->color == Color::Red)
                     {
-                        z->parent->color = Color::Black;
+                        parent->color = Color::Black;
                         uncle->color = Color::Black;
-                        z->parent->parent->color = Color::Red;
-                        z = z->parent->parent;
+                        grandparent->color = Color::Red;
+                        z = grandparent;
                     }
 
                     //Uncle is black
                     else
                     {
-                        if (z == z->parent->left)
+                        if (z == parent->left)
                         {
-                            z = z->parent;
+                            z = parent;
                             rightRotate(z);
+
+                            //reassign after rotation
+                            parent = z->parent.lock();
+                            grandparent = parent->parent.lock();
                         }
 
-                        z->parent->color = Color::Black;
-                        z->parent->parent->color = Color::Red;
-                        leftRotate(z->parent->parent);
+                        parent->color = Color::Black;
+                        grandparent->color = Color::Red;
+                        leftRotate(grandparent);
                     }
 
                 }
@@ -233,6 +248,7 @@ namespace dvd
 
                 std::cout << std::endl;
             }
+            std::cout << std::endl;
         }
     };
 }

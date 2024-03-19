@@ -17,6 +17,8 @@ void test1()
     numbers.insert(9, "Nine");
 
     numbers.printBFS();
+
+    std::cin.get();
 }
 
 
