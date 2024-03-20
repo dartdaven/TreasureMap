@@ -53,7 +53,11 @@ namespace dvd
 
         void leftRotate(std::shared_ptr<Node>& x)
         {
+            assert(x && "Pointer passed is not valid");
+
             std::shared_ptr<Node> y = x->right;
+
+            assert(y && "Can't perform left rotation as right child is not valid");
 
             x->right = y->left;
 
@@ -71,7 +75,11 @@ namespace dvd
 
         void rightRotate(std::shared_ptr<Node>& y)
         {
+            assert(y && "Pointer passed is not valid");
+
             std::shared_ptr<Node> x = y->left;
+
+            assert(x && "Can't perform left rotation as left child is not valid");
 
             y->left = x->right;
 
@@ -87,7 +95,6 @@ namespace dvd
             y->parent = x;
         }
 
-        //TODO solve weak_ptr problem
         void insertFixup(std::shared_ptr<Node> z)
         {
             //std::shared_ptr<Node> z = newNode; //Is it the same as accept atribute as copy?
@@ -126,6 +133,8 @@ namespace dvd
                             grandparent = parent->parent.lock();
                         }
 
+                        assert(parent && grandparent && "Parent and Grandparent are not valid");
+
                         parent->color = Color::Black;
                         grandparent->color = Color::Red;
                         rightRotate(grandparent);
@@ -158,6 +167,8 @@ namespace dvd
                             parent = z->parent.lock();
                             grandparent = parent->parent.lock();
                         }
+
+                        assert(parent && grandparent && "Parent and Grandparent are not valid");
 
                         parent->color = Color::Black;
                         grandparent->color = Color::Red;

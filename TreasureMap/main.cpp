@@ -21,10 +21,34 @@ void test1()
     std::cin.get();
 }
 
+void test2()
+{
+    dvd::RBTree<int, std::string> numbers{ { 20, "Twenty" }, { 11, "Eleven" } };
+
+    numbers.insert(40, "Fourty");
+    numbers.insert(10, "Ten");
+    numbers.insert(15, "Fifteen");
+    numbers.insert(30, "Thirty");
+    numbers.insert(5, "Five");
+    numbers.insert(12, "Twelve");
+    numbers.insert(18, "Eighteen");
+    numbers.insert(28, "Twenty Eight");
+    numbers.insert(35, "Thirty Five");
+    numbers.insert(2, "Two");
+    numbers.insert(6, "Six");
+    numbers.insert(13, "Thirteen");
+    numbers.insert(31, "Thirty One");
+    numbers.insert(38, "Thirty Eight");
+
+    numbers.printBFS();
+
+    std::cin.get();
+}
+
 
 int main()
 {
-    test1();
+    test2();
 
     std::cin.get();
 }
