@@ -51,6 +51,12 @@ namespace dvd
             return nullptr;
         }
 
+        std::shared_ptr<Node> findMinNodeInSubTree(std::shared_ptr<Node> x) const
+        {
+            while (x->left) x = x->left;
+            return x;
+        }
+
         void leftRotate(std::shared_ptr<Node>& x)
         {
             assert(x && "Pointer passed is not valid");
@@ -97,11 +103,8 @@ namespace dvd
 
         void insertFixup(std::shared_ptr<Node> z)
         {
-            //std::shared_ptr<Node> z = newNode; //Is it the same as accept atribute as copy?
-
             while (z->parent.lock() != nullptr && z->parent.lock()->color == Color::Red)
             {
-               // printBFS();
 
                 std::shared_ptr<Node> parent = z->parent.lock();
                 std::shared_ptr<Node> grandparent = parent->parent.lock();
@@ -181,6 +184,23 @@ namespace dvd
             m_Root->color = Color::Black;
         }
 
+        // Erase section
+
+        void transplant(std::shared_ptr<Node> u, std::shared_ptr<Node> v)
+        {
+            assert(u && v && "Not valid pointers provided to transplant method");
+
+            if (u->parent.lock() == nullptr) // u is root
+                m_Root = v;
+            else if (u == u->parent.lock()->left)
+                u->parent.lock()->left = v;
+            else
+                u->parent.lock()->right = v;
+
+            v->parent = u->parent;
+        }
+
+
     public:
         RBTree(std::initializer_list<std::pair<KeyType, ValueType>> initList)
         {
@@ -230,6 +250,57 @@ namespace dvd
             ++m_Size;
         }
         
+        void erase(const KeyType& key)
+        {
+            std::shared_ptr<Node> z = find(key);
+            if (!z) 
+            {
+                debug::Log("Key not found");
+                return;
+            }
+
+            std::shared_ptr<Node> x, y = z;
+            Color yOriginalColor = y->color;
+
+            if (!z->left)
+            {
+                x = z->right;
+                transplant(z, z->right);
+            }
+            if (!z->right)
+            {
+                x = z->left;
+                transplant(z, z->left)
+            }
+            else
+            {
+                y = findMinNodeInSubTree(z->right);
+                yOriginalColor = y->color;
+                x = y->right;
+
+                if (y->parent.lock() == z)
+                {
+                    if (x) x->parent = y;
+                }
+                else
+                {
+                    transplant(y, y->right);
+                    y->right = z->right;
+                    if (y->right) y->right->parent = y;
+                }
+
+                transplant(z, y);
+                y->left = z->left;
+                y->left->parent = y;
+                y->color = z->color;
+            }
+
+            if (yOriginalColor == Color::Black)
+                //fix up x
+
+            --m_Size;
+        }
+
         //Debug
         void printBFS() const
         {
