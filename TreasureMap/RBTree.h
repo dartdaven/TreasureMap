@@ -57,7 +57,7 @@ namespace dvd
             return x;
         }
 
-        void leftRotate(std::shared_ptr<Node>& x)
+        void leftRotate(std::shared_ptr<Node> x)
         {
             assert(x && "Pointer passed is not valid");
 
@@ -79,7 +79,7 @@ namespace dvd
             x->parent = y;
         }
 
-        void rightRotate(std::shared_ptr<Node>& y)
+        void rightRotate(std::shared_ptr<Node> y)
         {
             assert(y && "Pointer passed is not valid");
 
@@ -188,7 +188,7 @@ namespace dvd
 
         void transplant(std::shared_ptr<Node> u, std::shared_ptr<Node> v)
         {
-            assert(u && v && "Not valid pointers provided to transplant method");
+            //assert(u && v && "Not valid pointers provided to transplant method");
 
             if (u->parent.lock() == nullptr) // u is root
                 m_Root = v;
@@ -197,9 +197,86 @@ namespace dvd
             else
                 u->parent.lock()->right = v;
 
-            v->parent = u->parent;
+            if (v) v->parent = u->parent;
         }
 
+        void eraseFixup(std::shared_ptr<Node> x)
+        {
+            while (x != m_Root && x->color == Color::Black)
+            {
+                if (x == x->parent.lock()->left)
+                {
+                    std::shared_ptr<Node> w = x->parent.lock()->right;
+
+                    if (w->color == Color::Red)
+                    {
+                        w->color = Color::Black;
+                        x->parent.lock()->color = Color::Red;
+                        leftRotate(x->parent.lock());
+                        w = x->parent.lock()->right;
+                    }
+
+                    if ((!w->left || w->left->color == Color::Black) && (!w->right || w->right->color == Color::Black))
+                    {
+                        w->color = Color::Red;
+                        x = x->parent.lock();
+                    }
+                    else
+                    {
+                        if (!w->right || w->right->color == Color::Black)
+                        {
+                            if (w->left) w->left->color = Color::Black;
+                            w->color = Color::Red;
+                            rightRotate(w);
+                            w = x->parent.lock()->right;
+                        }
+
+                        w->color = x->parent.lock()->color;
+                        x->parent.lock()->color = Color::Black;
+                        if (w->right) w->right->color = Color::Black;
+                        leftRotate(x->parent.lock());
+                        x = m_Root;
+                    }
+                }
+                else
+                {
+                    std::shared_ptr<Node> w = x->parent.lock()->left;
+
+                    if (w->color == Color::Red)
+                    {
+                        w->color = Color::Black;
+                        x->parent.lock()->color = Color::Red;
+                        rightRotate(x->parent.lock());
+                        w = x->parent.lock()->left;
+                    }
+
+                    if ((!w->right || w->right->color == Color::Black) &&
+                        (!w->left || w->left->color == Color::Black))
+                    {
+                        w->color = Color::Red;
+                        x = x->parent.lock();
+                    }
+                    else
+                    {
+                        if (!w->left || w->left->color == Color::Black)
+                        {
+                            if (w->right) w->right->color = Color::Black;
+                            w->color = Color::Red;
+                            leftRotate(w);
+                            w = x->parent.lock()->left;
+                        }
+
+                        w->color = x->parent.lock()->color;
+                        x->parent.lock()->color = Color::Black;
+                        if (w->left) w->left->color = Color::Black;
+                        rightRotate(x->parent.lock());
+                        x = m_Root;
+                    }
+                }
+            }
+
+            if (x) x->color = Color::Black;
+        }
 
     public:
         RBTree(std::initializer_list<std::pair<KeyType, ValueType>> initList)
@@ -270,7 +347,7 @@ namespace dvd
             if (!z->right)
             {
                 x = z->left;
-                transplant(z, z->left)
+                transplant(z, z->left);
             }
             else
             {
@@ -291,12 +368,11 @@ namespace dvd
 
                 transplant(z, y);
                 y->left = z->left;
-                y->left->parent = y;
+                if (y->left) y->left->parent = y;
                 y->color = z->color;
             }
 
-            if (yOriginalColor == Color::Black)
-                //fix up x
+            if (yOriginalColor == Color::Black) eraseFixup(x);
 
             --m_Size;
         }

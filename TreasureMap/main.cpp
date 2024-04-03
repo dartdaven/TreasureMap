@@ -45,10 +45,31 @@ void test2()
     std::cin.get();
 }
 
+void test3()
+{
+    dvd::RBTree<int, std::string> numbers{ {8, "Eight"}, {5, "Five"} };
+
+    numbers.insert(15, "Fifteen");
+    numbers.insert(12, "Twelve");
+    numbers.insert(19, "Nineteen");
+    numbers.insert(9, "Nine");
+    numbers.insert(13, "THirteen");
+    numbers.insert(23, "Twenty Three");
+    numbers.insert(10, "Ten");
+
+    numbers.printBFS();
+
+    numbers.erase(19);
+
+    //Something bad happening with 23 node
+    numbers.printBFS();
+
+}
+
 
 int main()
 {
-    test2();
+    test3();
 
     std::cin.get();
 }
