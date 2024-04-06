@@ -53,17 +53,30 @@ void test3()
     numbers.insert(12, "Twelve");
     numbers.insert(19, "Nineteen");
     numbers.insert(9, "Nine");
-    numbers.insert(13, "THirteen");
+    numbers.insert(13, "Thirteen");
     numbers.insert(23, "Twenty Three");
     numbers.insert(10, "Ten");
 
     numbers.printBFS();
 
+    //case 1 left null
     numbers.erase(19);
-
-    //Something bad happening with 23 node
     numbers.printBFS();
 
+    //case 2 right null
+    numbers.insert(1, "One");
+    numbers.erase(5);
+    numbers.printBFS();
+
+    //--- Problematic cases -- 
+
+    //case both is null
+    numbers.erase(23);
+    numbers.printBFS();
+
+    //case 3 none null
+    numbers.erase(12);
+    numbers.printBFS(); 
 }
 
 

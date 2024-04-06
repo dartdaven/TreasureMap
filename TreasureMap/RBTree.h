@@ -188,8 +188,6 @@ namespace dvd
 
         void transplant(std::shared_ptr<Node> u, std::shared_ptr<Node> v)
         {
-            //assert(u && v && "Not valid pointers provided to transplant method");
-
             if (u->parent.lock() == nullptr) // u is root
                 m_Root = v;
             else if (u == u->parent.lock()->left)
@@ -330,13 +328,16 @@ namespace dvd
         void erase(const KeyType& key)
         {
             std::shared_ptr<Node> z = find(key);
+            
             if (!z) 
             {
                 debug::Log("Key not found");
                 return;
             }
 
-            std::shared_ptr<Node> x, y = z;
+            std::shared_ptr<Node> y = z;
+            std::shared_ptr<Node> x;
+
             Color yOriginalColor = y->color;
 
             if (!z->left)
@@ -344,7 +345,7 @@ namespace dvd
                 x = z->right;
                 transplant(z, z->right);
             }
-            if (!z->right)
+            else if (!z->right)
             {
                 x = z->left;
                 transplant(z, z->left);
@@ -372,6 +373,7 @@ namespace dvd
                 y->color = z->color;
             }
 
+            //There's a problem when x is null
             if (yOriginalColor == Color::Black) eraseFixup(x);
 
             --m_Size;
