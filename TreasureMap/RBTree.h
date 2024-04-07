@@ -174,8 +174,6 @@ namespace dvd
             m_Root->color = Color::Black;
         }
 
-        // Erase section
-
         void transplant(std::shared_ptr<Node> u, std::shared_ptr<Node> v)
         {
             if (u->parent.lock() == m_NIL) // u is root
@@ -373,6 +371,26 @@ namespace dvd
             if (yOriginalColor == Color::Black) eraseFixup(x);
 
             --m_Size;
+        }
+
+        bool contains(const KeyType& key) const
+        {
+            if (find(key) != m_NIL) return true;
+            else return false;
+        }
+
+        size_t size() const { return m_Size; }
+
+        ValueType& operator[](const KeyType& key)
+        {
+            std::shared_ptr<Node> node = find(key);
+
+            if (node != m_NIL) return node->value;
+            else
+            {
+                insert(key, ValueType());
+                return find(key)->value;
+            }
         }
 
         //Debug

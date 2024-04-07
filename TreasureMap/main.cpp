@@ -40,6 +40,16 @@ void test3()
     //case 4 none null root is the parent
     numbers.erase(8);
     numbers.printBFS();
+
+    if (numbers.contains(13)) debug::Log("Contains work");
+    if (numbers.contains(0)) debug::Log("Contains does not work"); //NIL case
+    if (!numbers.contains(23)) debug::Log("Contains work");
+
+    std::cout << numbers[13] << std::endl;
+    std::cout << numbers[23] << std::endl;
+
+    numbers.printBFS();
+
 }
 
 int main()

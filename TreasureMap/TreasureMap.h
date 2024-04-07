@@ -21,7 +21,7 @@ namespace dvd
 
 		std::function<size_t(const KeyType&)> m_HashFunction;
 
-		size_t hash(const KeyType& key)
+		size_t hash(const KeyType& key) const
 		{
 			assert(m_HashFunction && "Hash function is absent");
 
@@ -153,11 +153,12 @@ namespace dvd
 					}
 				}
 
+				//TODO insert
 				debug::Log("Nothing to access found");
 			}
 		}
 
-		bool contains(const KeyType& key)
+		bool contains(const KeyType& key) const
 		{
 			size_t index = hash(key);
 

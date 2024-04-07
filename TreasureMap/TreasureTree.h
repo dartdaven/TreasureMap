@@ -92,9 +92,6 @@ namespace dvd
             }
         }
 
-
-
-
     public:
         TreasureTree(std::initializer_list<std::pair<KeyType, ValueType>> initList)
         {
@@ -132,18 +129,21 @@ namespace dvd
             std::unique_ptr<Node>& node = find(m_Root, key);
             
             if (node) return node->value;
+            
+            //TODO insert
             else debug::Log("Nothing to access found");
         }
 
-        void printOut()
-        {
-            realPrintOut(m_Root);
-        }
-
-        bool contains(const KeyType& key)
+        bool contains(const KeyType& key) const
         {
             if (find(m_Root, key) != nullptr) return true;
             else return false;
+        }
+       
+        //Debug
+        void printOut()
+        {
+            realPrintOut(m_Root);
         }
     };
 }
