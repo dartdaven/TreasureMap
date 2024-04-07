@@ -21,8 +21,8 @@ namespace dvd
             
             std::weak_ptr<Node> parent;
 
-            Node(const KeyType& k, const ValueType& v, Color c = Color::Red, std::weak_ptr<Node> p = std::weak_ptr<Node>()) 
-                : key(k), value(v), color(c), parent(p) {}
+            Node(const KeyType& k, const ValueType& v, Color c = Color::Red, std::weak_ptr<Node> p = std::weak_ptr<Node>(), std::shared_ptr<Node> l = nullptr, std::shared_ptr<Node> r = nullptr)
+                : key(k), value(v), color(c), parent(p), left(l), right(r) {}
 
             //Debug
             ~Node()
@@ -31,7 +31,10 @@ namespace dvd
             }
         };
 
-        std::shared_ptr<Node> m_Root;
+        //Sentinel node
+        std::shared_ptr<Node> m_NIL = std::make_shared<Node>(KeyType(), ValueType(), Color::Black);
+        
+        std::shared_ptr<Node> m_Root = m_NIL;
 
         size_t m_Size;
 
@@ -41,37 +44,33 @@ namespace dvd
         {
             std::shared_ptr<Node> iterator = m_Root;
 
-            while (iterator)
+            while (iterator != m_NIL)
             {
                 if (key == iterator->key) return iterator;
                 else if (key < iterator->key) iterator = iterator->left;
                 else iterator = iterator->right;
             }
 
-            return nullptr;
+            return m_NIL;
         }
 
         std::shared_ptr<Node> findMinNodeInSubTree(std::shared_ptr<Node> x) const
         {
-            while (x->left) x = x->left;
+            while (x->left != m_NIL) x = x->left;
             return x;
         }
 
         void leftRotate(std::shared_ptr<Node> x)
         {
-            assert(x && "Pointer passed is not valid");
-
             std::shared_ptr<Node> y = x->right;
-
-            assert(y && "Can't perform left rotation as right child is not valid");
 
             x->right = y->left;
 
-            if (y->left != nullptr) y->left->parent = x;
+            if (y->left != m_NIL) y->left->parent = x;
 
             y->parent = x->parent;
 
-            if (x->parent.lock() == nullptr) m_Root = y;
+            if (x->parent.lock() == m_NIL) m_Root = y;
             else if (x == x->parent.lock()->left) x->parent.lock()->left = y;
             else x->parent.lock()->right = y;
 
@@ -81,19 +80,15 @@ namespace dvd
 
         void rightRotate(std::shared_ptr<Node> y)
         {
-            assert(y && "Pointer passed is not valid");
-
             std::shared_ptr<Node> x = y->left;
-
-            assert(x && "Can't perform left rotation as left child is not valid");
 
             y->left = x->right;
 
-            if (x->right != nullptr) x->right->parent = y;
+            if (x->right != m_NIL) x->right->parent = y;
 
             x->parent = y->parent;
             
-            if (y->parent.lock() == nullptr) m_Root = x;
+            if (y->parent.lock() == m_NIL) m_Root = x;
             else if (y == y->parent.lock()->right) y->parent.lock()->right = x;
             else y->parent.lock()->left = x;
             
@@ -103,7 +98,7 @@ namespace dvd
 
         void insertFixup(std::shared_ptr<Node> z)
         {
-            while (z->parent.lock() != nullptr && z->parent.lock()->color == Color::Red)
+            while (z->parent.lock()->color == Color::Red)
             {
 
                 std::shared_ptr<Node> parent = z->parent.lock();
@@ -115,7 +110,7 @@ namespace dvd
                     std::shared_ptr<Node> uncle = grandparent->right;
 
                     //Uncle is red
-                    if (uncle != nullptr && uncle->color == Color::Red)
+                    if (uncle->color == Color::Red)
                     {
                         parent->color = Color::Black;
                         uncle->color = Color::Black;
@@ -136,8 +131,6 @@ namespace dvd
                             grandparent = parent->parent.lock();
                         }
 
-                        assert(parent && grandparent && "Parent and Grandparent are not valid");
-
                         parent->color = Color::Black;
                         grandparent->color = Color::Red;
                         rightRotate(grandparent);
@@ -150,7 +143,7 @@ namespace dvd
                     std::shared_ptr<Node> uncle = grandparent->left;
 
                     //Uncle is red
-                    if (uncle != nullptr && uncle->color == Color::Red)
+                    if (uncle->color == Color::Red)
                     {
                         parent->color = Color::Black;
                         uncle->color = Color::Black;
@@ -171,13 +164,10 @@ namespace dvd
                             grandparent = parent->parent.lock();
                         }
 
-                        assert(parent && grandparent && "Parent and Grandparent are not valid");
-
                         parent->color = Color::Black;
                         grandparent->color = Color::Red;
                         leftRotate(grandparent);
                     }
-
                 }
             }
 
@@ -188,14 +178,14 @@ namespace dvd
 
         void transplant(std::shared_ptr<Node> u, std::shared_ptr<Node> v)
         {
-            if (u->parent.lock() == nullptr) // u is root
+            if (u->parent.lock() == m_NIL) // u is root
                 m_Root = v;
             else if (u == u->parent.lock()->left)
                 u->parent.lock()->left = v;
             else
                 u->parent.lock()->right = v;
 
-            if (v) v->parent = u->parent;
+            v->parent = u->parent;
         }
 
         void eraseFixup(std::shared_ptr<Node> x)
@@ -214,16 +204,16 @@ namespace dvd
                         w = x->parent.lock()->right;
                     }
 
-                    if ((!w->left || w->left->color == Color::Black) && (!w->right || w->right->color == Color::Black))
+                    if (w->left->color == Color::Black && w->right->color == Color::Black)
                     {
                         w->color = Color::Red;
                         x = x->parent.lock();
                     }
                     else
                     {
-                        if (!w->right || w->right->color == Color::Black)
+                        if (w->right->color == Color::Black)
                         {
-                            if (w->left) w->left->color = Color::Black;
+                            w->left->color = Color::Black;
                             w->color = Color::Red;
                             rightRotate(w);
                             w = x->parent.lock()->right;
@@ -231,7 +221,7 @@ namespace dvd
 
                         w->color = x->parent.lock()->color;
                         x->parent.lock()->color = Color::Black;
-                        if (w->right) w->right->color = Color::Black;
+                        w->right->color = Color::Black;
                         leftRotate(x->parent.lock());
                         x = m_Root;
                     }
@@ -248,17 +238,16 @@ namespace dvd
                         w = x->parent.lock()->left;
                     }
 
-                    if ((!w->right || w->right->color == Color::Black) &&
-                        (!w->left || w->left->color == Color::Black))
+                    if (w->right->color == Color::Black && w->left->color == Color::Black)
                     {
                         w->color = Color::Red;
                         x = x->parent.lock();
                     }
                     else
                     {
-                        if (!w->left || w->left->color == Color::Black)
+                        if (w->left->color == Color::Black)
                         {
-                            if (w->right) w->right->color = Color::Black;
+                            w->right->color = Color::Black;
                             w->color = Color::Red;
                             leftRotate(w);
                             w = x->parent.lock()->left;
@@ -266,14 +255,14 @@ namespace dvd
 
                         w->color = x->parent.lock()->color;
                         x->parent.lock()->color = Color::Black;
-                        if (w->left) w->left->color = Color::Black;
+                        w->left->color = Color::Black;
                         rightRotate(x->parent.lock());
                         x = m_Root;
                     }
                 }
             }
 
-            if (x) x->color = Color::Black;
+            x->color = Color::Black;
         }
 
     public:
@@ -288,18 +277,25 @@ namespace dvd
         //Without recursion
         void insert(const KeyType& key, const ValueType& value)
         {
-            if (!m_Root)
+            if (m_Root == m_NIL)
             {
-                m_Root = std::make_shared<Node>(key, value, Color::Black);
+                m_Root = std::make_shared<Node>(key, value, Color::Black, m_NIL, m_NIL, m_NIL);
                 ++m_Size;
 
                 return;
             }
+            else if (key == m_NIL->key)
+            {
+                debug::Log("NIL case. Key is invalid");
+                //We can change the m_NIL key to random value 
 
-            std::shared_ptr<Node> nodeToAttachTo;
+                return;
+            }
+
+            std::shared_ptr<Node> nodeToAttachTo = m_NIL;
             std::shared_ptr<Node> iterator = m_Root;
 
-            while (iterator)
+            while (iterator != m_NIL)
             {
                 nodeToAttachTo = iterator;
                 
@@ -314,14 +310,15 @@ namespace dvd
 
             if (key < nodeToAttachTo->key)
             {
-                nodeToAttachTo->left = std::make_shared<Node>(key, value, Color::Red, nodeToAttachTo);
+                nodeToAttachTo->left = std::make_shared<Node>(key, value, Color::Red, nodeToAttachTo, m_NIL, m_NIL);
                 insertFixup(nodeToAttachTo->left);
             }
             else
             {
-                nodeToAttachTo->right = std::make_shared<Node>(key, value, Color::Red, nodeToAttachTo);
+                nodeToAttachTo->right = std::make_shared<Node>(key, value, Color::Red, nodeToAttachTo, m_NIL, m_NIL);
                 insertFixup(nodeToAttachTo->right);
             }
+
             ++m_Size;
         }
         
@@ -329,7 +326,7 @@ namespace dvd
         {
             std::shared_ptr<Node> z = find(key);
             
-            if (!z) 
+            if (z == m_NIL) 
             {
                 debug::Log("Key not found");
                 return;
@@ -340,12 +337,12 @@ namespace dvd
 
             Color yOriginalColor = y->color;
 
-            if (!z->left)
+            if (z->left == m_NIL)
             {
                 x = z->right;
                 transplant(z, z->right);
             }
-            else if (!z->right)
+            else if (z->right == m_NIL)
             {
                 x = z->left;
                 transplant(z, z->left);
@@ -358,22 +355,21 @@ namespace dvd
 
                 if (y->parent.lock() == z)
                 {
-                    if (x) x->parent = y;
+                    x->parent = y;
                 }
                 else
                 {
                     transplant(y, y->right);
                     y->right = z->right;
-                    if (y->right) y->right->parent = y;
+                    y->right->parent = y;
                 }
 
                 transplant(z, y);
                 y->left = z->left;
-                if (y->left) y->left->parent = y;
+                y->left->parent = y;
                 y->color = z->color;
             }
 
-            //There's a problem when x is null
             if (yOriginalColor == Color::Black) eraseFixup(x);
 
             --m_Size;
@@ -382,7 +378,7 @@ namespace dvd
         //Debug
         void printBFS() const
         {
-            if (!m_Root)
+            if (m_Root == m_NIL)
             {
                 std::cout << "Tree is empty." << std::endl;
                 return;
@@ -402,8 +398,8 @@ namespace dvd
 
                     std::cout << current->key << "(" << (current->color == Color::Red ? "Red" : "Black") << ") ";
 
-                    if (current->left) q.push(current->left);
-                    if (current->right) q.push(current->right);
+                    if (current->left != m_NIL) q.push(current->left);
+                    if (current->right != m_NIL) q.push(current->right);
                 }
 
                 std::cout << std::endl;
