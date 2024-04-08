@@ -93,7 +93,7 @@ namespace dvd
 		//TODO create an insert for rvalues
 		
 		template<typename... Args>
-		void emplace(KeyType key, Args&&... args)
+		void emplace(const KeyType& key, Args&&... args)
 		{
 			size_t index = hash(key);
 
@@ -178,7 +178,7 @@ namespace dvd
 
 		bool contains_by_value(const ValueType& value)
 		{
-
+			//TODO
 		}
 
 		void printOut()

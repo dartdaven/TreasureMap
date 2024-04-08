@@ -14,6 +14,10 @@ namespace dvd
 
             Node(const KeyType& k, const ValueType& v) : key(k), value(v) {}
 
+            template<typename... Args>
+            Node(const KeyType& k, Args&&... args)
+                : key(k), value(std::forward<Args>(args)...) {}
+
             //Debug
             ~Node()
             {

@@ -24,6 +24,11 @@ namespace dvd
             Node(const KeyType& k, const ValueType& v, Color c = Color::Red, std::weak_ptr<Node> p = std::weak_ptr<Node>(), std::shared_ptr<Node> l = nullptr, std::shared_ptr<Node> r = nullptr)
                 : key(k), value(v), color(c), parent(p), left(l), right(r) {}
 
+            //WHY IT IS NOT WORKING LIKE IN TREASURE TREE??????
+            template<typename... Args>
+            Node(const KeyType& k, Args&&... args)
+                : key(k), value(std::forward<Args>(args)...) {}
+
             //Debug
             ~Node()
             {
@@ -314,6 +319,65 @@ namespace dvd
             else
             {
                 nodeToAttachTo->right = std::make_shared<Node>(key, value, Color::Red, nodeToAttachTo, m_NIL, m_NIL);
+                insertFixup(nodeToAttachTo->right);
+            }
+
+            ++m_Size;
+        }
+
+        template<typename... Args>
+        void emplace(const KeyType& key, Args&&... args)
+        {
+            if (m_Root == m_NIL)
+            {
+                m_Root = std::make_shared<Node>(key, std::forward<Args>(args)...);
+                m_Root->parent = m_Root->left = m_Root->right = m_NIL;
+                m_Root->color = Color::Black;
+
+                ++m_Size;
+
+                return;
+            }
+            else if (key == m_NIL->key)
+            {
+                debug::Log("NIL case. Key is invalid");
+                //We can change the m_NIL key to random value 
+
+                return;
+            }
+
+            std::shared_ptr<Node> nodeToAttachTo = m_NIL;
+            std::shared_ptr<Node> iterator = m_Root;
+
+            while (iterator != m_NIL)
+            {
+                nodeToAttachTo = iterator;
+
+                if (key < iterator->key) iterator = iterator->left;
+                else if (key > iterator->key) iterator = iterator->right;
+                else
+                {
+                    debug::Log("Node with this key already exists");
+                    return;
+                }
+            }
+
+            if (key < nodeToAttachTo->key)
+            {
+                nodeToAttachTo->left = std::make_shared<Node>(key, std::forward<Args>(args)...);
+                nodeToAttachTo->left->color = Color::Red;
+                nodeToAttachTo->left->parent = nodeToAttachTo;
+                nodeToAttachTo->left->left = nodeToAttachTo->left->right = m_NIL;
+
+                insertFixup(nodeToAttachTo->left);
+            }
+            else
+            {
+                nodeToAttachTo->right = std::make_shared<Node>(key, std::forward<Args>(args)...);
+                nodeToAttachTo->right->color = Color::Red;
+                nodeToAttachTo->right->parent = nodeToAttachTo;
+                nodeToAttachTo->right->left = nodeToAttachTo->left->right = m_NIL;
+
                 insertFixup(nodeToAttachTo->right);
             }
 

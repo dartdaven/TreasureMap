@@ -6,7 +6,7 @@
 
 //TODO create a struct with debug messages on copy and move constructors and get through the map
 
-void test3()
+void test()
 {
     dvd::RBTree<int, std::string> numbers{ {8, "Eight"}, {5, "Five"} };
 
@@ -52,9 +52,35 @@ void test3()
 
 }
 
+struct Entity
+{
+    int x{}, y{}, z{};
+
+    Entity() {};
+    Entity(int x, int y, int z) : x(x), y(y), z(z) {};
+    Entity(int scalar) : x(scalar), y(scalar), z(scalar) {};
+};
+
+void emplaceTest()
+{
+    dvd::RBTree<int, Entity> numbers{};
+
+    numbers.emplace(8, 1, 2, 3);
+    numbers.emplace(5, 5);
+    numbers.emplace(15, 15);
+    numbers.emplace(12);
+    numbers.emplace(19, 3, 4, 6);
+    numbers.emplace(9, 5, 3, 2);
+    numbers.emplace(13, 13);
+    numbers.emplace(23, 1, 2, 3);
+    numbers.emplace(10);
+
+    numbers.printBFS();
+}
+
 int main()
 {
-    test3();
+    emplaceTest();
 
     std::cin.get();
 }
