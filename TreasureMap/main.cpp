@@ -81,9 +81,29 @@ void emplaceRBTest()
     numbers.printBFS();
 }
 
+void treasureTreeTest()
+{
+    dvd::TreasureTree<int, std::string> numbers{ {8, "Eight"}, {5, "Five"} };
+
+    numbers.insert(15, "Fifteen");
+    numbers.erase(8); //case 4-1
+    numbers.erase(8);
+    numbers.insert(12, "Twelve");
+    numbers.insert(19, "Nineteen");
+    numbers.insert(9, "Nine");
+    numbers.insert(4, "Four");
+    numbers.insert(10, "Ten");
+    numbers.erase(5); //case 4-2
+    numbers.insert(13, "Thirteen");
+    numbers.insert(23, "Twenty Three");
+
+    std::cout << numbers.size() << std::endl;
+
+}
+
 int main()
 {
-    emplaceRBTest();
+    treasureTreeTest();
 
     std::cin.get();
 }

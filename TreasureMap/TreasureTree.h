@@ -59,7 +59,11 @@ namespace dvd
 
         std::unique_ptr<Node>& find(std::unique_ptr<Node>& node, const KeyType& key)
         {
-            if (!node) return node; //nullptr
+            if (!node)
+            {
+                debug::Log("There's  no node with such key");
+                return node; //nullptr
+            }
             else if (key < node->key) find(node->left, key);
             else if (key > node->key) find(node->right, key);
             else return node;
@@ -83,17 +87,20 @@ namespace dvd
 
         void erase(std::unique_ptr<Node>& node)
         {
-            if (!node->left && !node->right) node.reset();
-            else if (!node->left) node = std::move(node->right);
-            else if (!node->right) node = std::move(node->left);
-            else
+            if (!node->left && !node->right) node.reset(); //1
+            else if (!node->left) node = std::move(node->right); //2
+            else if (!node->right) node = std::move(node->left); //3
+            else //4
             {
                 std::unique_ptr<Node>& replacementNode = findMinNodeInSubTree(node->right);
 
                 node->key = replacementNode->key;
                 node->value = replacementNode->value;
                 erase(replacementNode);
+                return;
             }
+
+            --m_Size;
         }
 
     public:
@@ -125,7 +132,11 @@ namespace dvd
 
         void erase(const KeyType& key)
         {
-            erase(find(m_Root, key));
+            std::unique_ptr<Node>& node = find(m_Root, key);
+
+            if (!node) return;
+
+            erase(node);
         }
 
         ValueType& operator[](const KeyType& key)
