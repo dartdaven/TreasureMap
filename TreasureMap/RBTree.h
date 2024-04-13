@@ -24,10 +24,9 @@ namespace dvd
             Node(const KeyType& k, const ValueType& v, Color c = Color::Red, std::weak_ptr<Node> p = std::weak_ptr<Node>(), std::shared_ptr<Node> l = nullptr, std::shared_ptr<Node> r = nullptr)
                 : key(k), value(v), color(c), parent(p), left(l), right(r) {}
 
-            //WHY IT IS NOT WORKING LIKE IN TREASURE TREE??????
             template<typename... Args>
-            Node(const KeyType& k, Args&&... args)
-                : key(k), value(std::forward<Args>(args)...) {}
+            Node(const KeyType& k, Color c, std::weak_ptr<Node> p, std::shared_ptr<Node> l, std::shared_ptr<Node> r, Args&&... args)
+                : key(k), color(c), parent(p), left(l), right(r), value(std::forward<Args>(args)...) {}
 
             //Debug
             ~Node()
@@ -330,9 +329,7 @@ namespace dvd
         {
             if (m_Root == m_NIL)
             {
-                m_Root = std::make_shared<Node>(key, std::forward<Args>(args)...);
-                m_Root->parent = m_Root->left = m_Root->right = m_NIL;
-                m_Root->color = Color::Black;
+                m_Root = std::make_shared<Node>(key, Color::Black, m_NIL, m_NIL, m_NIL, std::forward<Args>(args)...);
 
                 ++m_Size;
 
@@ -364,18 +361,14 @@ namespace dvd
 
             if (key < nodeToAttachTo->key)
             {
-                nodeToAttachTo->left = std::make_shared<Node>(key, std::forward<Args>(args)...);
-                nodeToAttachTo->left->color = Color::Red;
-                nodeToAttachTo->left->parent = nodeToAttachTo;
+                nodeToAttachTo->left = std::make_shared<Node>(key, Color::Red, nodeToAttachTo, m_NIL, m_NIL, std::forward<Args>(args)...);
                 nodeToAttachTo->left->left = nodeToAttachTo->left->right = m_NIL;
 
                 insertFixup(nodeToAttachTo->left);
             }
             else
             {
-                nodeToAttachTo->right = std::make_shared<Node>(key, std::forward<Args>(args)...);
-                nodeToAttachTo->right->color = Color::Red;
-                nodeToAttachTo->right->parent = nodeToAttachTo;
+                nodeToAttachTo->right = std::make_shared<Node>(key, Color::Red, nodeToAttachTo, m_NIL, m_NIL, std::forward<Args>(args)...);
                 nodeToAttachTo->right->left = nodeToAttachTo->left->right = m_NIL;
 
                 insertFixup(nodeToAttachTo->right);
