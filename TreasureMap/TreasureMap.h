@@ -73,10 +73,7 @@ namespace dvd
 				{
 					if (key == k)
 					{
-						v = value;
-
-						debug::Log("The value renewed");
-
+						debug::Log("Element with this key already exists");
 						return;
 					}
 				}
@@ -99,7 +96,7 @@ namespace dvd
 
 			if (m_Table[index].empty())
 			{
-				m_Table[index].emplace_back(std::forward<Args>(args)...);
+				m_Table[index].emplace_back(key, ValueType(std::forward<Args>(args)...));
 				++m_Size;
 			}
 			else
@@ -108,12 +105,12 @@ namespace dvd
 				{
 					if (key == k)
 					{
-						debug::Log("Can't emplace. Element with this key already exists in this map");
-
+						debug::Log("Element with this key already exists");
 						return;
 					}
 				}
-				m_Table[index].emplace_back(std::forward<Args>(args)...);
+
+				m_Table[index].emplace_back(key, ValueType(std::forward<Args>(args)...));
 				++m_Size;
 			}
 
@@ -152,10 +149,20 @@ namespace dvd
 						return it->second;
 					}
 				}
-
-				//TODO insert
-				debug::Log("Nothing to access found");
 			}
+
+			debug::Log("Inserting non-existed element");
+			insert(key, ValueType());
+			
+			for (auto it = m_Table[index].begin(); it != m_Table[index].end(); ++it)
+			{
+				if (key == it->first)
+				{
+					return it->second;
+				}
+			}
+			
+			assert(false && "Error with accessing the value by key");
 		}
 
 		bool contains(const KeyType& key) const
@@ -174,6 +181,8 @@ namespace dvd
 
 				return false;
 			}
+
+			return false;
 		}
 
 		bool contains_by_value(const ValueType& value)

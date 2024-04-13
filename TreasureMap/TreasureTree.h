@@ -41,7 +41,11 @@ namespace dvd
             }
             else if (key < node->key) realInsert(node->left, key, value);
             else if (key > node->key) realInsert(node->right, key, value);
-            else node->value = value; //Update the value in node
+            else
+            {
+                debug::Log("Element with this key already exists");
+                return;
+            }
         }
 
         template<typename... Args>
@@ -54,7 +58,11 @@ namespace dvd
             }
             else if (key < node->key) realEmplace(node->left, key, std::forward<Args>(args)...);
             else if (key > node->key) realEmplace(node->right, key, std::forward<Args>(args)...);
-            else node->value = ValueType(std::forward<Args>(args)...);
+            else
+            {
+                debug::Log("Element with this key already exists");
+                return;
+            }
         }
 
         std::unique_ptr<Node>& find(std::unique_ptr<Node>& node, const KeyType& key)
@@ -87,10 +95,10 @@ namespace dvd
 
         void erase(std::unique_ptr<Node>& node)
         {
-            if (!node->left && !node->right) node.reset(); //1
-            else if (!node->left) node = std::move(node->right); //2
-            else if (!node->right) node = std::move(node->left); //3
-            else //4
+            if (!node->left && !node->right) node.reset();
+            else if (!node->left) node = std::move(node->right);
+            else if (!node->right) node = std::move(node->left);
+            else
             {
                 std::unique_ptr<Node>& replacementNode = findMinNodeInSubTree(node->right);
 
@@ -144,9 +152,13 @@ namespace dvd
             std::unique_ptr<Node>& node = find(m_Root, key);
             
             if (node) return node->value;
-            
-            //TODO insert
-            else debug::Log("Nothing to access found");
+            else
+            {
+                debug::Log("Inserting non-existed element");
+                realInsert(m_Root, key, ValueType());
+
+                return find(m_Root, key)->value;
+            }
         }
 
         bool contains(const KeyType& key) const

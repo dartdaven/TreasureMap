@@ -81,7 +81,7 @@ void emplaceRBTest()
     numbers.printBFS();
 }
 
-void treasureTreeTest()
+void treasureTreeEraseTest()
 {
     dvd::TreasureTree<int, std::string> numbers{ {8, "Eight"}, {5, "Five"} };
 
@@ -101,9 +101,32 @@ void treasureTreeTest()
 
 }
 
+void treasureMapTreeAccessingTest()
+{
+    dvd::TreasureTree<int, std::string> numbers{ {8, "Eight"}, {5, "Five"} };
+
+    //inserting existing
+    numbers.insert(8, "Eight");
+    numbers.emplace(8, "Eight");
+
+    //accessing non-existing
+    std::cout << numbers[10] << std::endl;
+    numbers[11] = "Eleven";
+
+    dvd::TreasureMap<int, std::string> mnumbers{ {8, "Eight"}, {5, "Five"} };
+
+    //inserting existing
+    mnumbers.insert(8, "Eight");
+    mnumbers.emplace(8, "Eight");
+
+    //accessing non-existing
+    std::cout << mnumbers[10] << std::endl;
+    mnumbers[11] = "Eleven";
+}
+
 int main()
 {
-    treasureTreeTest();
+    treasureMapTreeAccessingTest();
 
     std::cin.get();
 }
