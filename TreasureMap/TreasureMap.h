@@ -41,7 +41,7 @@ namespace dvd
 		{
 			for (const auto& pair : initList) 
 			{
-				insert(pair.first, pair.second);
+				insert(std::move(pair));
 			}
 		}
 
@@ -82,13 +82,63 @@ namespace dvd
 			}
 		}
 
+		//rvalue key value
+		//This is actually emplace according to std::unordered map
+		void insert(KeyType&& key, ValueType&& value)
+		{
+			size_t index = hash(key);
+
+			if (m_Table[index].empty())
+			{
+				m_Table[index].emplace_back(std::move(key), std::move(value));
+				++m_Size;
+			}
+			else
+			{
+				for (auto& [k, v] : m_Table[index])
+				{
+					if (key == k)
+					{
+						debug::Log("Element with this key already exists");
+						return;
+					}
+				}
+				m_Table[index].emplace_back(std::move(key), std::move(value));
+				++m_Size;
+			}
+		}
+
+		//lvalue pair
 		void insert(const std::pair<KeyType, ValueType>& pair)
 		{
 			insert(pair.first, pair.second);
 		}
 
-		//TODO create an insert for rvalues
-		
+		//rvalue pair
+		void insert(std::pair<KeyType, ValueType>&& pair)
+		{
+			size_t index = hash(pair.first);
+
+			if (m_Table[index].empty())
+			{
+				m_Table[index].push_back(std::move(pair));
+				++m_Size;
+			}
+			else
+			{
+				for (auto& [k, v] : m_Table[index])
+				{
+					if (pair.first == k)
+					{
+						debug::Log("Element with this key already exists");
+						return;
+					}
+				}
+				m_Table[index].push_back(std::move(pair));
+				++m_Size;
+			}
+		}
+
 		template<typename... Args>
 		void emplace(const KeyType& key, Args&&... args)
 		{

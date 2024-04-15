@@ -13,6 +13,39 @@ struct Entity
     Entity() {};
     Entity(int x, int y, int z) : x(x), y(y), z(z) {};
     Entity(int scalar) : x(scalar), y(scalar), z(scalar) {};
+
+    Entity(const Entity& other) : x(other.x), y(other.y), z(other.z)
+    {
+        debug::Log("Copy constructor");
+    }
+
+    Entity& operator=(const Entity& other)
+    {
+        debug::Log("Copy");
+        x = other.x;
+        y = other.y;
+        z = other.z;
+        return *this;
+    }
+
+    Entity(Entity&& other) noexcept : x(other.x), y(other.y), z(other.z)
+    {
+        debug::Log("Move constructor");
+    }
+
+    Entity& operator=(Entity&& other) noexcept
+    {
+        debug::Log("Move");
+        x = other.x;
+        y = other.y;
+        z = other.z;
+        return *this;
+    }
+
+    ~Entity()
+    {
+        debug::Log("Destroy");
+    }
 };
 
 void RBtest()
@@ -101,6 +134,19 @@ void treasureTreeEraseTest()
 
 }
 
+void UBTest()
+{
+    dvd::TreasureTree<int, std::string> numbers{ {8, "Eight"}, {5, "Five"} };
+
+    numbers.insert(11, "Eleven");
+    numbers.insert(14, "Fourteen");
+    numbers.insert(13, "Thirteen");
+    numbers.insert(15, "Fifteen");
+
+    numbers.erase(11);
+    
+}
+
 void treasureMapTreeAccessingTest()
 {
     dvd::TreasureTree<int, std::string> numbers{ {8, "Eight"}, {5, "Five"} };
@@ -124,9 +170,39 @@ void treasureMapTreeAccessingTest()
     mnumbers[11] = "Eleven";
 }
 
+void moveCopyTreasureMapInsertTest()
+{
+    dvd::TreasureMap<int, Entity> numbers{};
+    std::unordered_map<int, Entity> stdNumbers{};
+
+    //rvalue pair
+    numbers.insert({ 8, Entity(8) });
+    stdNumbers.insert({ 8, Entity(8) });
+
+    numbers.insert(std::make_pair(4, Entity(4)));
+    stdNumbers.insert(std::make_pair(4, Entity(4)));
+
+    std::pair<int, Entity> pair{ 9, Entity(1, 2, 3) };
+    
+    //lvalue pair
+    numbers.insert(pair);
+    stdNumbers.insert(pair);
+
+    //rvalue key, value
+    numbers.insert(5, Entity(5));
+    //stdNumbers.insert(5, Entity(5)); //Compiler error, accepts pairs only
+    stdNumbers.emplace(5, Entity(5));
+
+    int a{ 6 };
+    Entity e{ 6 };
+
+    //lvalue key,value
+    numbers.insert(a, e);
+}
+
+
 int main()
 {
-    treasureMapTreeAccessingTest();
 
     std::cin.get();
 }
