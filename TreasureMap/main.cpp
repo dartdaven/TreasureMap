@@ -1,5 +1,7 @@
 #include <iostream>
 
+#include <map>
+
 #include "TreasureMap.h"
 #include "TreasureTree.h"
 #include "RBTree.h"
@@ -200,9 +202,39 @@ void moveCopyTreasureMapInsertTest()
     numbers.insert(a, e);
 }
 
+void moveCopyTreasureTreeInsertTest()
+{
+    dvd::TreasureTree<int, Entity> numbers{};
+    std::map<int, Entity> stdNumbers{};
+
+    //rvalue pair
+    numbers.insert({ 8, Entity(8) });
+    stdNumbers.insert({ 8, Entity(8) });
+
+    numbers.insert(std::make_pair(4, Entity(4)));
+    stdNumbers.insert(std::make_pair(4, Entity(4)));
+
+    std::pair<int, Entity> pair{ 9, Entity(1, 2, 3) };
+
+    //lvalue pair
+    numbers.insert(pair);
+    stdNumbers.insert(pair);
+
+    //rvalue key, value
+    numbers.insert(5, Entity(5));
+    //stdNumbers.insert(5, Entity(5)); //Compiler error, accepts pairs only
+    stdNumbers.emplace(5, Entity(5));
+
+    int a{ 6 };
+    Entity e{ 6 };
+
+    //lvalue key,value
+    numbers.insert(a, e);
+}
 
 int main()
 {
+    moveCopyTreasureTreeInsertTest();
 
     std::cin.get();
 }

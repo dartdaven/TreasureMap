@@ -48,6 +48,22 @@ namespace dvd
             }
         }
 
+        void realInsert(std::unique_ptr<Node>& node, KeyType&& key, ValueType&& value)
+        {
+            if (!node)
+            {
+                node = std::make_unique<Node>(std::move(key), std::move(value));
+                ++m_Size;
+            }
+            else if (key < node->key) realInsert(node->left, std::move(key), std::move(value));
+            else if (key > node->key) realInsert(node->right, std::move(key), std::move(value));
+            else
+            {
+                debug::Log("Element with this key already exists");
+                return;
+            }
+        }
+
         template<typename... Args>
         void realEmplace(std::unique_ptr<Node>& node, const KeyType& key, Args&&... args)
         {
@@ -127,9 +143,19 @@ namespace dvd
             realInsert(m_Root, key, value);
         }
 
+        void insert(KeyType&& key, ValueType&& value)
+        {
+            realInsert(m_Root, std::move(key), std::move(value));
+        }
+
         void insert(const std::pair<KeyType, ValueType>& pair)
         {
             realInsert(m_Root, pair.first, pair.second);
+        }
+
+        void insert(std::pair<KeyType, ValueType>&& pair)
+        {
+            realInsert(m_Root, std::move(pair.first), std::move(pair.second));
         }
 
         template<typename... Args>
