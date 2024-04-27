@@ -6,8 +6,6 @@
 #include "TreasureTree.h"
 #include "RBTree.h"
 
-//TODO create a struct with debug messages on copy and move constructors and get through the map
-
 struct Entity
 {
     int x{}, y{}, z{};
@@ -46,7 +44,7 @@ struct Entity
 
     ~Entity()
     {
-        debug::Log("Destroy");
+        debug::Log("Entity Destroyed");
     }
 };
 
@@ -232,9 +230,22 @@ void moveCopyTreasureTreeInsertTest()
     numbers.insert(a, e);
 }
 
+void nilCaseTestForRBTree()
+{
+    dvd::RBTree<int, Entity> numbers{};
+
+    numbers[1] = Entity(1);
+    numbers.emplace(0, 0);
+
+    dvd::RBTree<std::string, Entity> stringNumbers{};
+
+    stringNumbers.insert("One", 1);
+    stringNumbers.emplace("", 0);
+}
+
 int main()
 {
-    moveCopyTreasureTreeInsertTest();
+    nilCaseTestForRBTree();
 
     std::cin.get();
 }

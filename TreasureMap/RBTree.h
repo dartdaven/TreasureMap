@@ -21,12 +21,21 @@ namespace dvd
             
             std::weak_ptr<Node> parent;
 
+            //lvalue constructor
             Node(const KeyType& k, const ValueType& v, Color c = Color::Red, std::weak_ptr<Node> p = std::weak_ptr<Node>(), std::shared_ptr<Node> l = nullptr, std::shared_ptr<Node> r = nullptr)
                 : key(k), value(v), color(c), parent(p), left(l), right(r) {}
 
+            //rvalue constructor
+            Node(KeyType&& k, ValueType&& v, Color c = Color::Red, std::weak_ptr<Node> p = std::weak_ptr<Node>(), std::shared_ptr<Node> l = nullptr, std::shared_ptr<Node> r = nullptr)
+                : key(std::move(k)), value(std::move(v)), color(c), parent(p), left(l), right(r) {}
+
+            //emplace constructor
             template<typename... Args>
             Node(const KeyType& k, Color c, std::weak_ptr<Node> p, std::shared_ptr<Node> l, std::shared_ptr<Node> r, Args&&... args)
                 : key(k), color(c), parent(p), left(l), right(r), value(std::forward<Args>(args)...) {}
+
+            //NIL constructor
+            Node() : key(), color(Color::Black) {};
 
             //Debug
             ~Node()
@@ -36,7 +45,7 @@ namespace dvd
         };
 
         //Sentinel node
-        std::shared_ptr<Node> m_NIL = std::make_shared<Node>(KeyType(), ValueType(), Color::Black);
+        std::shared_ptr<Node> m_NIL = std::make_shared<Node>();
         
         std::shared_ptr<Node> m_Root = m_NIL;
 
@@ -276,20 +285,12 @@ namespace dvd
             }
         }
 
-        //Without recursion
         void insert(const KeyType& key, const ValueType& value)
         {
             if (m_Root == m_NIL)
             {
                 m_Root = std::make_shared<Node>(key, value, Color::Black, m_NIL, m_NIL, m_NIL);
                 ++m_Size;
-
-                return;
-            }
-            else if (key == m_NIL->key)
-            {
-                debug::Log("NIL case. Key is invalid");
-                //We can change the m_NIL key to random value 
 
                 return;
             }
@@ -324,6 +325,46 @@ namespace dvd
             ++m_Size;
         }
 
+        void insert(KeyType&& key, ValueType&& value)
+        {
+            if (m_Root == m_NIL)
+            {
+                m_Root = std::make_shared<Node>(std::move(key), std::move(value), Color::Black, m_NIL, m_NIL, m_NIL);
+                ++m_Size;
+
+                return;
+            }
+
+            std::shared_ptr<Node> nodeToAttachTo = m_NIL;
+            std::shared_ptr<Node> iterator = m_Root;
+
+            while (iterator != m_NIL)
+            {
+                nodeToAttachTo = iterator;
+
+                if (key < iterator->key) iterator = iterator->left;
+                else if (key > iterator->key) iterator = iterator->right;
+                else
+                {
+                    debug::Log("Node with this key already exists");
+                    return;
+                }
+            }
+
+            if (key < nodeToAttachTo->key)
+            {
+                nodeToAttachTo->left = std::make_shared<Node>(key, value, Color::Red, nodeToAttachTo, m_NIL, m_NIL);
+                insertFixup(nodeToAttachTo->left);
+            }
+            else
+            {
+                nodeToAttachTo->right = std::make_shared<Node>(key, value, Color::Red, nodeToAttachTo, m_NIL, m_NIL);
+                insertFixup(nodeToAttachTo->right);
+            }
+
+            ++m_Size;
+        }
+
         template<typename... Args>
         void emplace(const KeyType& key, Args&&... args)
         {
@@ -332,13 +373,6 @@ namespace dvd
                 m_Root = std::make_shared<Node>(key, Color::Black, m_NIL, m_NIL, m_NIL, std::forward<Args>(args)...);
 
                 ++m_Size;
-
-                return;
-            }
-            else if (key == m_NIL->key)
-            {
-                debug::Log("NIL case. Key is invalid");
-                //We can change the m_NIL key to random value 
 
                 return;
             }
@@ -445,7 +479,7 @@ namespace dvd
             if (node != m_NIL) return node->value;
             else
             {
-                insert(key, ValueType());
+                emplace(key);
                 return find(key)->value;
             }
         }
