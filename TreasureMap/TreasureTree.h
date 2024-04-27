@@ -109,11 +109,17 @@ namespace dvd
             else findMinNodeInSubTree(node->left);            
         }
 
+        void transplant(std::unique_ptr<Node>& u, std::unique_ptr<Node>& v)
+        {
+            std::unique_ptr<Node> tmp = std::move(v);
+            u = std::move(tmp);
+        }
+
         void erase(std::unique_ptr<Node>& node)
         {
             if (!node->left && !node->right) node.reset();
-            else if (!node->left) node = std::move(node->right);
-            else if (!node->right) node = std::move(node->left);
+            else if (!node->left) transplant(node, node->right);
+            else if (!node->right) transplant(node, node->left);
             else
             {
                 std::unique_ptr<Node>& replacementNode = findMinNodeInSubTree(node->right);

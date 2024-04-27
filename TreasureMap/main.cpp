@@ -245,7 +245,7 @@ void nilCaseTestForRBTree()
 
 int main()
 {
-    nilCaseTestForRBTree();
+    UBTest();
 
     std::cin.get();
 }
